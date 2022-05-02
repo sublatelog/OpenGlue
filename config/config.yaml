@@ -1,4 +1,4 @@
-gpus: [ 0, 1, 2 ]
+gpus: 0 # [ 0, 1, 2 ]
 data:
   root_path: '/datasets/extra_space2/ostap/MegaDepth'
   train_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_train_2.0.txt'
