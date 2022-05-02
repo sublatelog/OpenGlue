@@ -8,12 +8,22 @@ from torch.utils.data import DataLoader
 from data.megadepth_dataset import MegaDepthPairsDataset, MegaDepthPairsDatasetFeatures
 from data.megadepth_balanced_sampler import MegaDepthBalancedSampler
 
-
+# train > dm = MegaDepthPairsDataModule > BaseMegaDepthPairsDataModule
 class BaseMegaDepthPairsDataModule(pl.LightningDataModule):
-    def __init__(self, root_path, train_list_path, val_list_path, test_list_path,
-                 batch_size, num_workers, val_max_pairs_per_scene, balanced_train=False,
-                 train_pairs_overlap=None):
+    def __init__(self, 
+                 root_path, 
+                 train_list_path, 
+                 val_list_path, 
+                 test_list_path,
+                 batch_size, 
+                 num_workers, 
+                 val_max_pairs_per_scene, 
+                 balanced_train=False,
+                 train_pairs_overlap=None
+                ):
+        
         super(BaseMegaDepthPairsDataModule, self).__init__()
+        
         self.root_path = root_path
         self.train_list_path = train_list_path
         self.val_list_path = val_list_path
@@ -33,54 +43,78 @@ class BaseMegaDepthPairsDataModule(pl.LightningDataModule):
     def read_scenes_list(path):
         with open(path) as f:
             scenes_list = f.readlines()
+            
         return [s.rstrip() for s in scenes_list]
 
     def train_dataloader(self):
         sampler = MegaDepthBalancedSampler(self.train_ds) if self.balanced_train else None
+        
         return DataLoader(
-            self.train_ds,
-            sampler=sampler,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            collate_fn=self.train_batch_collate_fn
-        )
+                          self.train_ds,
+                          sampler=sampler,
+                          batch_size=self.batch_size,
+                          num_workers=self.num_workers,
+                          collate_fn=self.train_batch_collate_fn
+                          )
 
     def val_dataloader(self):
         return DataLoader(
-            self.val_ds,
-            shuffle=False,
-            batch_size=1,
-            num_workers=1,
-            collate_fn=self.val_batch_collate_fn
-        )
+                          self.val_ds,
+                          shuffle=False,
+                          batch_size=1,
+                          num_workers=1,
+                          collate_fn=self.val_batch_collate_fn
+                        )
 
-
+# train > dm = MegaDepthPairsDataModule
 class MegaDepthPairsDataModule(BaseMegaDepthPairsDataModule):
-    def __init__(self, root_path, train_list_path, val_list_path, test_list_path,
-                 batch_size, num_workers, target_size, val_max_pairs_per_scene,
-                 balanced_train=False, train_pairs_overlap=None):
+    def __init__(self, 
+                 root_path, 
+                 train_list_path, 
+                 val_list_path, 
+                 test_list_path,
+                 batch_size, 
+                 num_workers, 
+                 target_size, 
+                 val_max_pairs_per_scene,
+                 balanced_train=False, 
+                 train_pairs_overlap=None
+                ):
+        
         super(MegaDepthPairsDataModule, self).__init__(
-            root_path, train_list_path, val_list_path, test_list_path,
-            batch_size, num_workers, val_max_pairs_per_scene, balanced_train,
-            train_pairs_overlap
-        )
+                                                        root_path, 
+                                                        train_list_path, 
+                                                        val_list_path, 
+                                                        test_list_path,
+                                                        batch_size, 
+                                                        num_workers, 
+                                                        val_max_pairs_per_scene, 
+                                                        balanced_train,
+                                                        train_pairs_overlap
+                                                        )
+        
         self.target_size = target_size
 
-    def setup(self, stage: Optional[str] = None) -> None:
-        self.train_ds = MegaDepthPairsDataset(
-            root_path=self.root_path,
-            scenes_list=self.read_scenes_list(self.train_list_path),
-            target_size=self.target_size,
-            random_crop=True,
-            overlap=self.train_pairs_overlap
-        )
-        self.val_ds = MegaDepthPairsDataset(
-            root_path=self.root_path,
-            scenes_list=self.read_scenes_list(self.val_list_path),
-            target_size=self.target_size,
-            random_crop=False,
-            max_pairs_per_scene=self.val_max_pairs_per_scene
-        )
+    def setup(
+              self, 
+              stage: Optional[str] = None
+              ) -> None:
+        
+            self.train_ds = MegaDepthPairsDataset(
+                                                    root_path=self.root_path,
+                                                    scenes_list=self.read_scenes_list(self.train_list_path),
+                                                    target_size=self.target_size,
+                                                    random_crop=True,
+                                                    overlap=self.train_pairs_overlap
+                                                )
+            
+            self.val_ds = MegaDepthPairsDataset(
+                                                root_path=self.root_path,
+                                                scenes_list=self.read_scenes_list(self.val_list_path),
+                                                target_size=self.target_size,
+                                                random_crop=False,
+                                                max_pairs_per_scene=self.val_max_pairs_per_scene
+                                            )
 
 
 class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
