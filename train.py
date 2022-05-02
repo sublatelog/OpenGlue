@@ -82,6 +82,8 @@ def main():
     # If loaded from checkpoint - validate
     if config.get('checkpoint') is not None:
         trainer.validate(model, datamodule=dm, ckpt_path=config.get('checkpoint'))
+        
+    # datamodule=dm:dm.init() > dm.setup()の順で実行される
     trainer.fit(model, datamodule=dm, ckpt_path=config.get('checkpoint'))
 
 
