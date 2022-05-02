@@ -46,6 +46,7 @@ class BaseMegaDepthPairsDataModule(pl.LightningDataModule):
             
         return [s.rstrip() for s in scenes_list]
 
+    # train_dataloaderを返す
     def train_dataloader(self):
         sampler = MegaDepthBalancedSampler(self.train_ds) if self.balanced_train else None
         
@@ -57,6 +58,7 @@ class BaseMegaDepthPairsDataModule(pl.LightningDataModule):
                           collate_fn=self.train_batch_collate_fn
                           )
 
+    # val_dataloaderを返す
     def val_dataloader(self):
         return DataLoader(
                           self.val_ds,
@@ -95,6 +97,7 @@ class MegaDepthPairsDataModule(BaseMegaDepthPairsDataModule):
         
         self.target_size = target_size
 
+    # setup():fit()で実行される
     def setup(
               self, 
               stage: Optional[str] = None
@@ -116,7 +119,7 @@ class MegaDepthPairsDataModule(BaseMegaDepthPairsDataModule):
                                                 max_pairs_per_scene=self.val_max_pairs_per_scene
                                             )
 
-
+# megadepth_datamodule.py > main > dm = MegaDepthPairsDataModuleFeatures > setup() > val_dl = dm.val_dataloader()    
 class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
     def __init__(self, root_path, train_list_path, val_list_path, test_list_path,
                  batch_size, num_workers, target_size, features_dir, num_keypoints, val_max_pairs_per_scene,
