@@ -118,8 +118,11 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 #         K0, K1, RT = camera_params[:9], camera_params[9:18], camera_params[18:]
         K0 = np.array(K0.split()).astype(np.float32).reshape(3, 3)
         K1 = np.array(K1.split()).astype(np.float32).reshape(3, 3)
-        R0 = np.array(R1.split()).astype(np.float32).reshape(3, 3)
-        T0 = np.array(T1.split()).astype(np.float32).reshape(3, 1)
+        R0 = np.array(R0.split()).astype(np.float32).reshape(3, 3)
+        T0 = np.array(T0.split()).astype(np.float32).reshape(3, 1)
+        print("size")
+        print(R0.shape())
+        print(T0.shape())
         return img0_name + ".jpg", img1_name + ".jpg", K0, K1, R0, T0, float(overlap)
     
     @staticmethod
@@ -173,13 +176,12 @@ class MegaDepthPairsDataset(BaseMegaDepthPairsDataset):
         
         # 0,1のそれぞれで処理実行
         for img_name, K in ((img0_name, K0), (img1_name, K1)):
-            print("path")
-            print(str(self.root_path / 'train' / scene / 'images' / img_name))
             
             image = cv2.imread(str(self.root_path / 'train' / scene / 'images' / img_name))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             depth = cv2.imread(str(self.root_path / 'depth_maps' / scene / img_name))
+            
 #             depth = dd.io.load(str(self.root_path / 'depth_maps' / scene / img_name / '.jpg')
 #                 self.root_path / 'phoenix/S6/zl548/MegaDepth_v1' / scene / 'dense0/depths' / (img_name[:-3] + 'h5')))['depth']
 
