@@ -69,6 +69,8 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         print(root_path)
         
         self.root_path = Path(root_path)
+        
+        print("root_path1")
 
         # シーンごとのペアファイルを取得{scene名:ペアファイルパス}
         pairs_metadata_files = {scene: self.root_path / 'train' / scene / 'pair_covisibility.csv' for scene in scenes_list}
@@ -76,6 +78,7 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 #         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
         
+        print("root_path2")
         
         print("pairs_metadata_files[0]")
         print(pairs_metadata_files[0])
