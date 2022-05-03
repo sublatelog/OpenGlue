@@ -173,9 +173,9 @@ class MegaDepthPairsDataset(BaseMegaDepthPairsDataset):
         
         # 0,1のそれぞれで処理実行
         for img_name, K in ((img0_name, K0), (img1_name, K1)):
-            image = cv2.imread(str(self.root_path / 'train' / scene / 'images' / img_name / '.jpg'))
             print("str(self.root_path / 'train' / scene / 'images' / img_name / '.jpg')")
             print(str(self.root_path / 'train' / scene / 'images' / img_name / '.jpg'))
+            image = cv2.imread(str(self.root_path / 'train' / scene / 'images' / img_name / '.jpg'))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             depth = cv2.imread(str(self.root_path / 'depth_maps' / scene / img_name / '.jpg'))
