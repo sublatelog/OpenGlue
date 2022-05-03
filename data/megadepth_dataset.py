@@ -72,6 +72,12 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         calib_metadata_files = {scene: self.root_path / 'train' / scene / 'calibration.csv' for scene in scenes_list}
 #         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
+        print("root_path")
+        print(root_path)
+        
+        print("pairs_metadata_files[0]")
+        print(pairs_metadata_files[0])
+    
         # 順序付き辞書
         self.image_pairs = OrderedDict()
         
