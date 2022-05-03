@@ -20,9 +20,9 @@ def main():
     args = parser.parse_args()
 
     # Load config
-    config = OmegaConf.load('config/config.yaml')  # base config
+    config = OmegaConf.load('/content/OpenGlue/config/config.yaml')  # base config
     feature_extractor_config = OmegaConf.load(args.features_config)
-    if args.config != 'config/config.yaml':
+    if args.config != '/content/OpenGlue/config/config.yaml':
         add_conf = OmegaConf.load(args.config)
         config = OmegaConf.merge(config, add_conf)
 
