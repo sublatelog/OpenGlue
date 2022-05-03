@@ -48,7 +48,7 @@ class BaseMegaDepthPairsDataModule(pl.LightningDataModule):
         for path in dir_list:
             p = path.split(".")
             if len(p) == 1:
-                scean_list.append(p)
+                scean_list.append(p[0])
 
         return scean_list        
         
