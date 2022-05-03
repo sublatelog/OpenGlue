@@ -70,11 +70,12 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         
         self.root_path = Path(root_path)
         
-        print("root_path1")
+        print("self.root_path")
+        print(self.root_path)
 
         # シーンごとのペアファイルを取得{scene名:ペアファイルパス}
-        pairs_metadata_files = {scene: self.root_path + '/train/' + scene + '/pair_covisibility.csv' for scene in scenes_list}
-        calib_metadata_files = {scene: self.root_path + '/train/' + scene + '/calibration.csv' for scene in scenes_list}
+        pairs_metadata_files = {scene: self.root_path / 'train' / scene / 'pair_covisibility.csv' for scene in scenes_list}
+        calib_metadata_files = {scene: self.root_path / 'train' / scene / 'calibration.csv' for scene in scenes_list}
 #         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
         
