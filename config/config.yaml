@@ -2,8 +2,8 @@ gpus: 0 # [ 0, 1, 2 ]
 data:
   root_path: '/content/data'
   train_list_path: '/content/data/train'
-  val_list_path: '/content/data/test_images'
-  test_list_path: '/content/data/train'
+  val_list_path: '/content/data/train'
+  test_list_path: '/content/data/test_images'
   
 #   root_path: '/datasets/extra_space2/ostap/MegaDepth'
 #   train_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_train_2.0.txt'
