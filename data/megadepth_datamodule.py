@@ -41,10 +41,22 @@ class BaseMegaDepthPairsDataModule(pl.LightningDataModule):
 
     @staticmethod
     def read_scenes_list(path):
-        with open(path) as f:
-            scenes_list = f.readlines()
+        import os
+
+        dir_list = os.listdir(path)
+        scean_list = []
+        for path in dir_list:
+            p = path.split(".")
+            if len(p) == 1:
+                scean_list.append(p)
+
+        return scean_list        
+        
+        
+#         with open(path) as f:
+#             scenes_list = f.readlines()
             
-        return [s.rstrip() for s in scenes_list]
+#         return [s.rstrip() for s in scenes_list]
 
     # train_dataloaderを返す
     def train_dataloader(self):
