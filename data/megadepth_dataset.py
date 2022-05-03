@@ -116,10 +116,10 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         pair, overlap, _, img0_name, img1_name, K0, R0, T0, K1, R1, T1 = line
 #         camera_params = list(map(lambda x: float(x), camera_params))
 #         K0, K1, RT = camera_params[:9], camera_params[9:18], camera_params[18:]
-        K0 = np.array(K0).astype(np.float32).reshape(3, 3)
-        K1 = np.array(K1).astype(np.float32).reshape(3, 3)
-        RT = np.array(RT).astype(np.float32).reshape(4, 4)
-        R, T = RT[:3, :3], RT[:3, 3]
+        K0 = np.array(K0.split()).astype(np.float32).reshape(3, 3)
+        K1 = np.array(K1.split()).astype(np.float32).reshape(3, 3)
+        R0 = np.array(R1.split()).astype(np.float32).reshape(3, 3)
+        T0 = np.array(T1.split()).astype(np.float32).reshape(3, 1)
         return img0_name, img1_name, K0, K1, R0, T0, float(overlap)
     
     @staticmethod
