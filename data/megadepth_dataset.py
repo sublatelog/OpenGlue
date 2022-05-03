@@ -8,6 +8,8 @@ import deepdish as dd
 import numpy as np
 import torch
 
+import pandas as pd
+
 
 def array_to_tensor(img_array):
     return torch.FloatTensor(img_array / 255.).unsqueeze(0)
@@ -20,11 +22,13 @@ class MegaDepthWarpingDataset(torch.utils.data.Dataset):
 
     def __init__(self, root_path, scenes_list, target_size):
         self.root_path = Path(root_path)
-        self.images_list = [  # iter through all scenes and concatenate the results into one list
-            *chain(*[glob.glob(
-                str(self.root_path / scene / 'dense*' / 'imgs' / '*')
-            ) for scene in scenes_list])
+        
+        # iter through all scenes and concatenate the results into one list
+        self.images_list = [  
+            *chain(*[glob.glob(str(self.root_path / 'train'/ scene / 'images' / '*')) for scene in scenes_list])
+#             *chain(*[glob.glob(str(self.root_path / scene / 'dense*' / 'imgs' / '*')) for scene in scenes_list])
         ]
+        
         self.target_size = tuple(target_size)
 
     def __len__(self):
@@ -63,24 +67,24 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         
         self.root_path = Path(root_path)
 
-        # シーンごとのペアファイルを取得
-        pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
+        # シーンごとのペアファイルを取得{scene名:ペアファイルパス}
+        pairs_metadata_files = {scene: self.root_path / 'train' / scene / 'pair_covisibility.csv' for scene in scenes_list}
+#         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
         # 順序付き辞書
         self.image_pairs = OrderedDict()
         
         for scene, pairs_path in pairs_metadata_files.items():
-            try:
-                with open(pairs_path) as f:
-                    pairs_metadata = f.readlines()
-                    pairs_metadata = list(map(lambda x: x.rstrip(), pairs_metadata))
-                    
-                    if overlap is not None:  # keep pairs with given overlap
-                        pairs_metadata = self.filter_pairs_by_overlap(pairs_metadata, overlap)
-                        
-            except FileNotFoundError:
-                pairs_metadata = []
-                
+            pd_pairs = pd.read_csv(pairs_path)
+            split = pd_pairs["pair"].str.split('-', expand=True)
+            pd_pairs["img0"] = split[0]
+            pd_pairs["img1"] = split[1]
+            pd_calib = pd.read_csv("/content/data/train/brandenburg_gate/calibration.csv")
+            pd_pairs = pd.merge(pd_pairs, pd_calib, left_on='img0', right_on='image_id')
+            pd_pairs = pd.merge(pd_pairs, pd_calib, left_on='img1', right_on='image_id')
+            pd_pairs = pd_pairs.drop(["image_id_x","image_id_y"], axis=1)
+            pairs_metadata = pd_pairs.rename(columns={'camera_intrinsics_x': 'k0', 'camera_intrinsics_y': 'k1', 'rotation_matrix_x':'r0', 'rotation_matrix_y':'r1', 'translation_vector_x':'t0', 'translation_vector_y':'t1'})
+
             self.image_pairs[scene] = pairs_metadata
             
         self.scene_pairs_numbers = OrderedDict([(k, len(v)) for k, v in self.image_pairs.items()])
@@ -99,12 +103,27 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
             else:
                 idx -= pairs_num
                 
-        metadata = self.image_pairs[scene][scene_idx]
+        metadata = self.image_pairs[scene].iloc[scene_idx]
+#         metadata = self.image_pairs[scene][scene_idx]
         
-        return self.parse_pairs_line(metadata), scene, scene_idx
+        return self.parse_pairs_pd(metadata), scene, scene_idx
+#         return self.parse_pairs_line(metadata), scene, scene_idx
 
     @staticmethod
+    def parse_pairs_pd(line):
+        # pair	covisibility	fundamental_matrix	img0	img1	k0	r0	t0	k1	r1	t1
+        pair, overlap, _, img0_name, img1_name, K0, R0, T0, K1, R1, T1 = line
+#         camera_params = list(map(lambda x: float(x), camera_params))
+#         K0, K1, RT = camera_params[:9], camera_params[9:18], camera_params[18:]
+        K0 = np.array(K0).astype(np.float32).reshape(3, 3)
+        K1 = np.array(K1).astype(np.float32).reshape(3, 3)
+        RT = np.array(RT).astype(np.float32).reshape(4, 4)
+        R, T = RT[:3, :3], RT[:3, 3]
+        return img0_name, img1_name, K0, K1, R0, T0, float(overlap)
+    
+    @staticmethod
     def parse_pairs_line(line):
+        # img0_name, img1_name, _, _, (K0, K1, RT), overlap
         img0_name, img1_name, _, _, *camera_params, overlap = line.split(' ')
         camera_params = list(map(lambda x: float(x), camera_params))
         K0, K1, RT = camera_params[:9], camera_params[9:18], camera_params[18:]
