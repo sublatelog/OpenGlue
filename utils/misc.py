@@ -50,15 +50,15 @@ def get_inverse_transformation(transformation):
         
         print("R_t")
         print(R_t)
-        print(T)
+        print(T.unsqueeze(-1))
         
         return {
             'type': transformation['type'],
             'K0': K1,
             'K1': K0,
             'R': R_t,
-            'T': -torch.matmul(R_t, T).squeeze(-1),
-#             'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1),
+#             'T': -torch.matmul(R_t, T).squeeze(-1),
+            'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1),
             'depth0': depth1,
             'depth1': depth0,
         }
