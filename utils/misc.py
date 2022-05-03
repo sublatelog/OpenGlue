@@ -46,7 +46,8 @@ def get_inverse_transformation(transformation):
         K0, K1 = transformation['K0'], transformation['K1']
         T, R = transformation['T'], transformation['R']
         depth0, depth1 = transformation['depth0'], transformation['depth1']
-        R_t = torch.transpose(R, 1, 2).contiguous()
+#         R_t = torch.transpose(R, 1, 2).contiguous()
+        R_t = torch.transpose(R, 2, 1).contiguous()
         
         print("R_t")
         print(R_t)
