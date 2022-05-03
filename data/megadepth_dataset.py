@@ -63,7 +63,7 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         
         self.root_path = Path(root_path)
 
-        # ペアファイル
+        # シーンごとのペアファイルを取得
         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
         # 順序付き辞書
