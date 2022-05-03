@@ -114,15 +114,13 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
     def parse_pairs_pd(line):
         # pair	covisibility	fundamental_matrix	img0	img1	k0	r0	t0	k1	r1	t1
         pair, overlap, _, img0_name, img1_name, K0, R0, T0, K1, R1, T1 = line
-#         camera_params = list(map(lambda x: float(x), camera_params))
-#         K0, K1, RT = camera_params[:9], camera_params[9:18], camera_params[18:]
-        K0 = np.array(K0.split()).astype(np.float32).reshape(3, 3)
-        K1 = np.array(K1.split()).astype(np.float32).reshape(3, 3)
-        R0 = np.array(R0.split()).astype(np.float32).reshape(3, 3)
-        T0 = np.array(T0.split()).astype(np.float32).reshape(3, 1)
+        K0 = np.array(K0.split(" ")).astype(np.float32).reshape(3, 3)
+        K1 = np.array(K1.split(" ")).astype(np.float32).reshape(3, 3)
+        R0 = np.array(R0.split(" ")).astype(np.float32).reshape(3, 3)
+        T0 = np.array(T0.split(" ")).astype(np.float32).reshape(3, 1)
         print("size")
-        print(R0.size())
-        print(T0.size())
+        print(R0)
+        print(T0)
         return img0_name + ".jpg", img1_name + ".jpg", K0, K1, R0, T0, float(overlap)
     
     @staticmethod
