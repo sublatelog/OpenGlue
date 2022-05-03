@@ -118,9 +118,6 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         K1 = np.array(K1.split(" ")).astype(np.float32).reshape(3, 3)
         R0 = np.array(R0.split(" ")).astype(np.float32).reshape(3, 3)
         T0 = np.array(T0.split(" ")).astype(np.float32).reshape(3, 1)
-        print("size")
-        print(R0)
-        print(T0)
         return img0_name + ".jpg", img1_name + ".jpg", K0, K1, R0, T0, float(overlap)
     
     @staticmethod
