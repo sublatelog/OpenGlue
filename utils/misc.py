@@ -50,7 +50,7 @@ def get_inverse_transformation(transformation):
         
         print("R_t")
         print(R_t)
-        print(T.unsqueeze(-1))
+        print(T)
         
         return {
             'type': transformation['type'],
