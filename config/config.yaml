@@ -1,9 +1,14 @@
 gpus: 0 # [ 0, 1, 2 ]
 data:
-  root_path: '/datasets/extra_space2/ostap/MegaDepth'
-  train_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_train_2.0.txt'
-  val_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
-  test_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
+  root_path: '/content/data'
+  train_list_path: '/content/data/train.csv'
+  val_list_path: '/content/data/train.csv'
+  test_list_path: '/content/data/test.csv'
+  
+#   root_path: '/datasets/extra_space2/ostap/MegaDepth'
+#   train_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_train_2.0.txt'
+#   val_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
+#   test_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
 
   batch_size_per_gpu: 2
   dataloader_workers_per_gpu: 4
