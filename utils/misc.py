@@ -50,8 +50,8 @@ def get_inverse_transformation(transformation):
         R_t = torch.transpose(R, 2, 1).contiguous()
         
         print("R_t")
-        print(R_t)
-        print(T.unsqueeze(-1))
+        print(R_t.shapee)
+        print(T.unsqueeze(-1).shapee)
         
         return {
             'type': transformation['type'],
