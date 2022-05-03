@@ -69,6 +69,7 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 
         # シーンごとのペアファイルを取得{scene名:ペアファイルパス}
         pairs_metadata_files = {scene: self.root_path / 'train' / scene / 'pair_covisibility.csv' for scene in scenes_list}
+        calib_metadata_files = {scene: self.root_path / 'train' / scene / 'calibration.csv' for scene in scenes_list}
 #         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
         # 順序付き辞書
@@ -79,7 +80,7 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
             split = pd_pairs["pair"].str.split('-', expand=True)
             pd_pairs["img0"] = split[0]
             pd_pairs["img1"] = split[1]
-            pd_calib = pd.read_csv("/content/data/train/brandenburg_gate/calibration.csv")
+            pd_calib = pd.read_csv(calib_metadata_files["scene"])
             pd_pairs = pd.merge(pd_pairs, pd_calib, left_on='img0', right_on='image_id')
             pd_pairs = pd.merge(pd_pairs, pd_calib, left_on='img1', right_on='image_id')
             pd_pairs = pd_pairs.drop(["image_id_x","image_id_y"], axis=1)
