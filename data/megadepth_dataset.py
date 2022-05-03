@@ -64,29 +64,17 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
                  max_pairs_per_scene=None, 
                  overlap=None
                 ):
-        
-        print("root_path")
-        print(root_path)
-        
+                
         self.root_path = Path(root_path)
-        
-        print("scenes_list")
-        print(scenes_list)
 
         # シーンごとのペアファイルを取得{scene名:ペアファイルパス}
-        pairs_metadata_files = {scene: self.root_path / 'train' / scene / 'pair_covisibility.csv' for scene in scenes_list}
-        
-        print("pairs_metadata_files")
-        print(pairs_metadata_files)
-        
+        pairs_metadata_files = {scene: self.root_path / 'train' / scene / 'pair_covisibility.csv' for scene in scenes_list}        
         calib_metadata_files = {scene: self.root_path / 'train' / scene / 'calibration.csv' for scene in scenes_list}
 #         pairs_metadata_files = {scene: self.root_path / 'pairs' / scene / 'sparse-txt' / 'pairs.txt' for scene in scenes_list}
         
-        
-        print("root_path2")
-        
-        print("pairs_metadata_files[0]")
-        print(pairs_metadata_files[0])
+                
+        print("len(pairs_metadata_files)")
+        print(len(pairs_metadata_files))
     
         # 順序付き辞書
         self.image_pairs = OrderedDict()
