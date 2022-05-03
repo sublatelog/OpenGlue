@@ -35,6 +35,7 @@ def reproject_keypoints(kpts, transformation):
 
 def get_inverse_transformation(transformation):
     transformation_type = transformation['type'][0]
+    
     if transformation_type == 'perspective':
         H = transformation['H']
         return {
@@ -46,6 +47,11 @@ def get_inverse_transformation(transformation):
         T, R = transformation['T'], transformation['R']
         depth0, depth1 = transformation['depth0'], transformation['depth1']
         R_t = torch.transpose(R, 1, 2).contiguous()
+        
+        print("R_t")
+        print(R_t)
+        print(T)
+        
         return {
             'type': transformation['type'],
             'K0': K1,
