@@ -109,11 +109,15 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     # apply (R, T)
     kpts_transformed = torch.matmul(kpts_transformed, R_t) 
     
-    print(kpts_transformed.unsqueeze(-1).shape)
-    print(T.unsqueeze(1).shape)
+
     
     kpts_transformed = kpts_transformed.unsqueeze(-1) + T.unsqueeze(1)
 #     kpts_transformed = torch.matmul(kpts_transformed, R_t) + T.unsqueeze(1)
+
+
+    print(kpts_transformed.shape)
+    print(K1_t.shape)
+    
     kpts_transformed = torch.matmul(kpts_transformed, K1_t)
     
 
