@@ -22,37 +22,40 @@ def main():
     # Load config
     config = OmegaConf.load('/content/OpenGlue/config/config.yaml')  # base config
     feature_extractor_config = OmegaConf.load(args.features_config)
+    
     if args.config != '/content/OpenGlue/config/config.yaml':
         add_conf = OmegaConf.load(args.config)
         config = OmegaConf.merge(config, add_conf)
 
-    pl.seed_everything(int(os.environ.get('LOCAL_RANK', 0)))
+    pl.seed_everything(int(os.environ.get('LOCAL_RANK', 0))) # LOCAL_RANK:同じノード内のプロセス中何番目かを表す番号
 
     # Prepare directory for logs and checkpoints
     if os.environ.get('LOCAL_RANK', 0) == 0:
         experiment_name = '{}__attn_{}__laf_{}__{}'.format(
-            feature_extractor_config['name'],
-            config['superglue']['attention_gnn']['attention'],
-            config['superglue']['laf_to_sideinfo_method'],
-            str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-        )
+                                                            feature_extractor_config['name'], # 'SIFT'
+                                                            config['superglue']['attention_gnn']['attention'], # softmax
+                                                            config['superglue']['laf_to_sideinfo_method'], # 'none'
+                                                            str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+                                                          )
+        
         log_path = prepare_logging_directory(config, experiment_name, features_config=feature_extractor_config)
+        
     else:
         experiment_name, log_path = '', ''
 
     # Init Lightning Data Module
     data_config = config['data']
     dm = MegaDepthPairsDataModule(
-        root_path=data_config['root_path'],
-        train_list_path=data_config['train_list_path'],
-        val_list_path=data_config['val_list_path'],
-        test_list_path=data_config['test_list_path'],
-        batch_size=data_config['batch_size_per_gpu'],
-        num_workers=data_config['dataloader_workers_per_gpu'],
-        target_size=data_config['target_size'],
-        val_max_pairs_per_scene=data_config['val_max_pairs_per_scene'],
-        train_pairs_overlap=data_config.get('train_pairs_overlap')
-    )
+                                    root_path=data_config['root_path'],
+                                    train_list_path=data_config['train_list_path'],
+                                    val_list_path=data_config['val_list_path'],
+                                    test_list_path=data_config['test_list_path'],
+                                    batch_size=data_config['batch_size_per_gpu'],
+                                    num_workers=data_config['dataloader_workers_per_gpu'],
+                                    target_size=data_config['target_size'],
+                                    val_max_pairs_per_scene=data_config['val_max_pairs_per_scene'],
+                                    train_pairs_overlap=data_config.get('train_pairs_overlap')
+                                )
 
     # Init model
     model = MatchingTrainingModule(
