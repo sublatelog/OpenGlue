@@ -71,7 +71,7 @@ class LAF2AffineGeom(BaseLAFConversionFunction):
     def side_info_dim(self):
         return 4
 
-
+# LAFファイルは、Lingoes Projectによって開発されたLingoes Appendixです
 class LAFConverter:
     """Class for converting LAFs to geometric side info
      in the format appropriate for SuperGlue"""
@@ -104,7 +104,7 @@ class LAFConverter:
         else:
             return sum(f.side_info_dim for f in self.cvt_funcs)
 
-
+# LAFConverter()のパラメーターを選択
 def get_laf_to_sideinfo_converter(method_name: str = 'none') -> LAFConverter:
     """
     Get LAF converter with appropriate transformations given method name.
