@@ -1,4 +1,4 @@
-gpus: 0 # [ 0, 1, 2 ]
+gpus: [ 0, 1, 2 ] # [ 0, 1, 2 ]
 data:
   root_path: '/content/data'
   train_list_path: '/content/data/train'
