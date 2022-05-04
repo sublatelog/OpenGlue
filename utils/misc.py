@@ -99,6 +99,9 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
         ]
     mask = ~torch.isclose(depth, depth.new_tensor(0.0))  # mask for values with missing depth information
     
+    print(depth.shape)
+    print(depth.unsqueeze(-1).shape)
+    
     # multiply by corresponding depth  
 #     kpts_transformed = kpts_transformed * depth
     kpts_transformed = kpts_transformed * depth.unsqueeze(-1)
