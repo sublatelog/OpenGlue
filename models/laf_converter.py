@@ -73,8 +73,7 @@ class LAF2AffineGeom(BaseLAFConversionFunction):
 
 # LAFファイルは、Lingoes Projectによって開発されたLingoes Appendixです
 class LAFConverter:
-    """Class for converting LAFs to geometric side info
-     in the format appropriate for SuperGlue"""
+    """Class for converting LAFs to geometric side info in the format appropriate for SuperGlue"""
 
     def __init__(self, cvt_funcs: Optional[Iterable[BaseLAFConversionFunction]] = None):
         """
@@ -84,6 +83,7 @@ class LAFConverter:
         """
         self.cvt_funcs = cvt_funcs
 
+    # インスタンス名をそのまま関数のように使ったときに呼び出される関数
     def __call__(self, lafs: torch.Tensor) -> torch.Tensor:
         """
         Transform LAFs to side infor with each function independently and concatenate the result.
@@ -114,6 +114,7 @@ def get_laf_to_sideinfo_converter(method_name: str = 'none') -> LAFConverter:
     Returns:
         callable object for converting lafs to side information
     """
+    # 'SIFT', laf_to_sideinfo_method: 'none'
     if method_name.lower() == 'none':
         return LAFConverter()
     elif method_name.lower() == 'rotation':
