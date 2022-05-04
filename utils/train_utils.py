@@ -12,7 +12,10 @@ from utils.lightning_callbacks import FavorAttentionProjectionRedrawCallback
 
 def prepare_logging_directory(config, experiment_name, features_config=None):
     # create logging directory
+    # logging_root_path:logs
+    # logging_name: 'default'
     log_path = os.path.join(config['logging']['root_path'], config['logging']['name'], experiment_name)
+    
     if not os.path.exists(log_path):
         os.makedirs(log_path, exist_ok=True)
         
@@ -20,8 +23,8 @@ def prepare_logging_directory(config, experiment_name, features_config=None):
     with open(os.path.join(log_path, 'config.yaml'), 'w') as f:
         f.write(OmegaConf.to_yaml(config))
         
-    # also save features config from features directory
-    if 'features_dir' in config['data']:
+    # 実行時のconfigファイルを保存。 also save features config from features directory
+    if 'features_dir' in config['data']:        
         shutil.copyfile(
                         src=os.path.join(config['data']['root_path'], config['data']['features_dir'], 'config.yaml'),
                         dst=os.path.join(log_path, 'features_config.yaml')
@@ -30,6 +33,7 @@ def prepare_logging_directory(config, experiment_name, features_config=None):
     if features_config is not None:
         with open(os.path.join(log_path, 'features_config.yaml'), 'w') as f:
             f.write(OmegaConf.to_yaml(features_config))
+            
     return log_path
 
 
