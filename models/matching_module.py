@@ -22,25 +22,34 @@ class MatchingTrainingModule(pl.LightningModule):
         self.superglue_config = superglue_config
 
         if not self.config.get('use_cached_features', False):
+            
+            # 名前指定でfeatures_extractorのmodelを選び、パラメーターを設定
             self.local_features_extractor = get_feature_extractor(self.features_config['name'])(
-                **self.features_config['parameters']
-            )
-
+                                                                                                **self.features_config['parameters']
+                                                                                                )
+            # finetuneする場合はfeatures_configで設定されたものを取り出す
             self.finetune_features_extractor = self.features_config.get('finetune', False)
+            
+            # finetuneする場合はfeatures_extractorのパラメータをrequires_gradに設定
             for p in self.local_features_extractor.parameters():
                 p.requires_grad = self.finetune_features_extractor
+                
 
-        # The dimensionality of descriptor depends on the local feature extractor, so this parameter is
-        # configures in features config file
-        descriptor_dim = self.features_config['descriptor_dim']
+        # SIFTのdimに合わせてsuperglueのdimを設定
+        # The dimensionality of descriptor depends on the local feature extractor, so this parameter is configures in features config file
+        descriptor_dim = self.features_config['descriptor_dim'] # descriptor_dim: 128
         self.superglue_config['descriptor_dim'] = descriptor_dim
         self.superglue_config['positional_encoding']['output_size'] = descriptor_dim
         self.superglue_config['attention_gnn']['embed_dim'] = descriptor_dim
 
-        self.laf_converter = get_laf_to_sideinfo_converter(self.superglue_config['laf_to_sideinfo_method'])
+        
+        self.laf_converter = get_laf_to_sideinfo_converter(self.superglue_config['laf_to_sideinfo_method']) # laf_to_sideinfo_method: 'none'
+        
         # set side_info dimension based on provided laf_converter
-        self.superglue_config['positional_encoding']['side_info_size'] = \
-            self.laf_converter.side_info_dim + 1  # plus 1 for responses
+        # side_info_dim():0 < laf_to_sideinfo_method: 'none'
+        self.superglue_config['positional_encoding']['side_info_size'] = elf.laf_converter.side_info_dim + 1  # plus 1 for responses
+        
+        # superglueの設定
         self.superglue = SuperGlue(self.superglue_config)
 
         # augmentation
@@ -84,13 +93,14 @@ class MatchingTrainingModule(pl.LightningModule):
             lafs1, responses1, desc1 = batch['lafs1'], batch['scores1'], batch['descriptors1']
 
         log_transform_response = self.superglue_config.get('log_transform_response', False)
+        
         data, y_true = generate_gt_matches(
-            batch,
-            prepare_features_output(lafs0, responses0, desc0, self.laf_converter, log_response=log_transform_response),
-            prepare_features_output(lafs1, responses1, desc1, self.laf_converter, log_response=log_transform_response),
-            self.config['gt_positive_threshold'],
-            self.config['gt_negative_threshold']
-        )
+                                            batch,
+                                            prepare_features_output(lafs0, responses0, desc0, self.laf_converter, log_response=log_transform_response),
+                                            prepare_features_output(lafs1, responses1, desc1, self.laf_converter, log_response=log_transform_response),
+                                            self.config['gt_positive_threshold'],
+                                            self.config['gt_negative_threshold']
+                                          )
 
         # skip step if no keypoints are detected on at least one of the images
         if data is None:
