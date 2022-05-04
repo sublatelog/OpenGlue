@@ -133,14 +133,32 @@ class MegaDepthPairsDataModule(BaseMegaDepthPairsDataModule):
 
 # megadepth_datamodule.py > main > dm = MegaDepthPairsDataModuleFeatures > setup() > val_dl = dm.val_dataloader()    
 class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
-    def __init__(self, root_path, train_list_path, val_list_path, test_list_path,
-                 batch_size, num_workers, target_size, features_dir, num_keypoints, val_max_pairs_per_scene,
-                 balanced_train=False, train_pairs_overlap=None):
+    def __init__(self, 
+                 root_path, 
+                 train_list_path, 
+                 val_list_path, 
+                 test_list_path,
+                 batch_size, 
+                 num_workers, 
+                 target_size, 
+                 features_dir, 
+                 num_keypoints, 
+                 val_max_pairs_per_scene,
+                 balanced_train=False, 
+                 train_pairs_overlap=None
+                ):
+        
         super(MegaDepthPairsDataModuleFeatures, self).__init__(
-            root_path, train_list_path, val_list_path, test_list_path,
-            batch_size, num_workers, val_max_pairs_per_scene, balanced_train,
-            train_pairs_overlap
-        )
+                                                                root_path, 
+                                                                train_list_path, 
+                                                                val_list_path, 
+                                                                test_list_path,
+                                                                batch_size, 
+                                                                num_workers, 
+                                                                val_max_pairs_per_scene, 
+                                                                balanced_train,
+                                                                train_pairs_overlap
+                                                                )
         self.features_dir = features_dir
         self.target_size = target_size
         self.num_keypoints = num_keypoints
@@ -164,15 +182,16 @@ class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
         descriptor_size = batch[0]['descriptors0'].size(1)
 
         result = {
-            'lafs0': torch.zeros(batch_size, target_num_keypoints, 2, 3),
-            'scores0': torch.zeros(batch_size, target_num_keypoints),
-            'descriptors0': torch.zeros(batch_size, target_num_keypoints, descriptor_size),
-            'lafs1': torch.zeros(batch_size, target_num_keypoints, 2, 3),
-            'scores1': torch.zeros(batch_size, target_num_keypoints),
-            'descriptors1': torch.zeros(batch_size, target_num_keypoints, descriptor_size),
-            'image0_size': batch[0]['image0_size'],
-            'image1_size': batch[0]['image1_size'],
-        }
+                    'lafs0': torch.zeros(batch_size, target_num_keypoints, 2, 3),
+                    'scores0': torch.zeros(batch_size, target_num_keypoints),
+                    'descriptors0': torch.zeros(batch_size, target_num_keypoints, descriptor_size),
+                    'lafs1': torch.zeros(batch_size, target_num_keypoints, 2, 3),
+                    'scores1': torch.zeros(batch_size, target_num_keypoints),
+                    'descriptors1': torch.zeros(batch_size, target_num_keypoints, descriptor_size),
+                    'image0_size': batch[0]['image0_size'],
+                    'image1_size': batch[0]['image1_size'],
+                }
+        
         transformation = {
             'type': ['3d_reprojection'],
             'K0': torch.stack([x['transformation']['K0'] for x in batch]),
@@ -198,9 +217,9 @@ class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
                     result[f'descriptors{image_id}'][i] = batch[i][f'descriptors{image_id}'][kpts_select_idx]
 
                     transformation[f'depth{image_id}'][i] = batch[i]['transformation'][f'depth{image_id}'][
-                        result[f'lafs{image_id}'][i][:, 1, 2].type(torch.int64),
-                        result[f'lafs{image_id}'][i][:, 0, 2].type(torch.int64),
-                    ]
+                                                                                                            result[f'lafs{image_id}'][i][:, 1, 2].type(torch.int64),
+                                                                                                            result[f'lafs{image_id}'][i][:, 0, 2].type(torch.int64),
+                                                                                                          ]
 
                 else:  # select all keypoint and treat other kpts as virtual which are ignored while training
                     result[f'lafs{image_id}'][i, :num_kpts] = batch[i][f'lafs{image_id}']
@@ -208,9 +227,9 @@ class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
                     result[f'descriptors{image_id}'][i, :num_kpts] = batch[i][f'descriptors{image_id}']
 
                     transformation[f'depth{image_id}'][i, :num_kpts] = batch[i]['transformation'][f'depth{image_id}'][
-                        batch[i][f'lafs{image_id}'][:, 1, 2].type(torch.int64),
-                        batch[i][f'lafs{image_id}'][:, 0, 2].type(torch.int64),
-                    ]
+                                                                                                                      batch[i][f'lafs{image_id}'][:, 1, 2].type(torch.int64),
+                                                                                                                      batch[i][f'lafs{image_id}'][:, 0, 2].type(torch.int64),
+                                                                                                                      ]
 
         result['transformation'] = transformation
 
@@ -218,35 +237,36 @@ class MegaDepthPairsDataModuleFeatures(BaseMegaDepthPairsDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.train_ds = MegaDepthPairsDatasetFeatures(
-            root_path=self.root_path,
-            features_dir=self.features_dir,
-            scenes_list=self.read_scenes_list(self.train_list_path),
-            target_size=self.target_size,
-            random_crop=True,
-            overlap=self.train_pairs_overlap
-        )
+                                                      root_path=self.root_path,
+                                                      features_dir=self.features_dir,
+                                                      scenes_list=self.read_scenes_list(self.train_list_path),
+                                                      target_size=self.target_size,
+                                                      random_crop=True,
+                                                      overlap=self.train_pairs_overlap
+                                                      )  
+        
         self.val_ds = MegaDepthPairsDatasetFeatures(
-            root_path=self.root_path,
-            features_dir=self.features_dir,
-            scenes_list=self.read_scenes_list(self.val_list_path),
-            target_size=self.target_size,
-            random_crop=False,
-            max_pairs_per_scene=self.val_max_pairs_per_scene
-        )
+                                                    root_path=self.root_path,
+                                                    features_dir=self.features_dir,
+                                                    scenes_list=self.read_scenes_list(self.val_list_path),
+                                                    target_size=self.target_size,
+                                                    random_crop=False,
+                                                    max_pairs_per_scene=self.val_max_pairs_per_scene
+                                                    )
 
 
 if __name__ == '__main__':
     dm = MegaDepthPairsDataModuleFeatures(
-        root_path='/datasets/extra_space2/ostap/MegaDepth',
-        train_list_path='/home/ostap/projects/superglue-lightning/assets/megadepth_train_3.0.txt',
-        val_list_path='/home/ostap/projects/superglue-lightning/assets/megadepth_valid_3.0.txt',
-        test_list_path='/home/ostap/projects/superglue-lightning/assets/megadepth_valid_3.0.txt',
-        batch_size=12, num_workers=3, num_keypoints=1024,
-        features_dir='SuperPointNet_960_720',
-        target_size=[960, 720],
-        val_max_pairs_per_scene=50,
-        train_pairs_overlap=[0.15, 0.7]
-    )
+                                            root_path='/datasets/extra_space2/ostap/MegaDepth',
+                                            train_list_path='/home/ostap/projects/superglue-lightning/assets/megadepth_train_3.0.txt',
+                                            val_list_path='/home/ostap/projects/superglue-lightning/assets/megadepth_valid_3.0.txt',
+                                            test_list_path='/home/ostap/projects/superglue-lightning/assets/megadepth_valid_3.0.txt',
+                                            batch_size=12, num_workers=3, num_keypoints=1024,
+                                            features_dir='SuperPointNet_960_720',
+                                            target_size=[960, 720],
+                                            val_max_pairs_per_scene=50,
+                                            train_pairs_overlap=[0.15, 0.7]
+                                        )
 
     dm.setup()
     val_dl = dm.val_dataloader()
