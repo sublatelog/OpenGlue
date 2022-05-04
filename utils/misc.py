@@ -87,9 +87,9 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
 
     # if depth is in image format, len(depth0.shape) > 2 than select depth at kpts locations
     
-    print("depth0.shape")
-    print(depth0.shape)
     
+    
+    # depth0.shape : torch.Size([2, 720, 960])
     if len(depth0.shape) == 2:
         depth = depth0
     else:
@@ -103,13 +103,14 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     mask = ~torch.isclose(depth, depth.new_tensor(0.0))  # mask for values with missing depth information
     
     
-
+    print("kpts_transformed")
+    print(kpts_transformed.shape)
+    print(depth.unsqueeze(-1).shape)
     
     # multiply by corresponding depth  
     # kpts_transformed : torch.Size([2, 604, 3])
     # depth.unsqueeze(-1) : torch.Size([2, 604, 3, 1])
     kpts_transformed = kpts_transformed * depth.unsqueeze(-1)
-#     kpts_transformed = kpts_transformed * depth
     
     print(kpts_transformed.shape)
     print(T.unsqueeze(1).shape)
