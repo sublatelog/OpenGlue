@@ -11,9 +11,9 @@ data:
 #   test_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
 
   batch_size_per_gpu: 2
-  dataloader_workers_per_gpu: 4
+  dataloader_workers_per_gpu: 1 # 4
   target_size: [ 960, 720 ]
-  val_max_pairs_per_scene: 50
+  val_max_pairs_per_scene: 5 # 50
   train_pairs_overlap: [0.15, 0.7]
 
 logging:
@@ -24,7 +24,7 @@ logging:
 train:
   epochs: 100
   steps_per_epoch: 10000
-  grad_clip: 10.0
+  grad_clip: 2 # 10.0
   precision: 32
   gt_positive_threshold: 2
   gt_negative_threshold: 7
