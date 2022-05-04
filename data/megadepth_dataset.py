@@ -176,6 +176,7 @@ class MegaDepthPairsDataset(BaseMegaDepthPairsDataset):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             depth = cv2.imread(str(self.root_path / 'depth_maps' / scene / img_name))
+            depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
             
 #             depth = dd.io.load(str(self.root_path / 'depth_maps' / scene / img_name / '.jpg')
 #                 self.root_path / 'phoenix/S6/zl548/MegaDepth_v1' / scene / 'dense0/depths' / (img_name[:-3] + 'h5')))['depth']
