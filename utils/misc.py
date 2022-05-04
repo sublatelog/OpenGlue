@@ -110,8 +110,9 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
 #     kpts_transformed = kpts_transformed * depth.unsqueeze(-1)
     
     # torch.Size([2, 604, 3, 1]) * torch.Size([2, 604, 3, 1])
-    kpts_transformed = kpts_transformed.unsqueeze(-1) * depth.unsqueeze(-1)
-    
+#     kpts_transformed = kpts_transformed.unsqueeze(-1) * depth.unsqueeze(-1)
+
+    kpts_transformed = kpts_transformed * depth.unsqueeze(-1)
 
 #     print(kpts_transformed.shape)
 #     print(R_t.shape)
