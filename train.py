@@ -59,10 +59,10 @@ def main():
 
     # Init model
     model = MatchingTrainingModule(
-        train_config={**config['train'], **config['inference'], **config['evaluation']},
-        features_config=feature_extractor_config,
-        superglue_config=config['superglue'],
-    )
+                                    train_config={**config['train'], **config['inference'], **config['evaluation']},
+                                    features_config=feature_extractor_config,
+                                    superglue_config=config['superglue'],
+                                    )
 
     # Set callbacks and loggers
     callbacks = get_training_callbacks(config, log_path, experiment_name)
@@ -70,18 +70,19 @@ def main():
 
     # Init distributed trainer
     trainer = pl.Trainer(
-        gpus=config['gpus'],
-        max_epochs=config['train']['epochs'],
-        accelerator="ddp",
-        gradient_clip_val=config['train']['grad_clip'],
-        log_every_n_steps=config['logging']['train_logs_steps'],
-        limit_train_batches=config['train']['steps_per_epoch'],
-        num_sanity_val_steps=0,
-        callbacks=callbacks,
-        logger=loggers,
-        plugins=DDPPlugin(find_unused_parameters=False),
-        precision=config['train'].get('precision', 32),
-    )
+                        gpus=config['gpus'],
+                        max_epochs=config['train']['epochs'],
+                        accelerator="gpu", # "ddp", # ハードウェアの種類を指す: "cpu" "gpu" "tpu" "ipu" "auto"
+                        gradient_clip_val=config['train']['grad_clip'],
+                        log_every_n_steps=config['logging']['train_logs_steps'],
+                        limit_train_batches=config['train']['steps_per_epoch'],
+                        num_sanity_val_steps=0,
+                        callbacks=callbacks,
+                        logger=loggers,
+                        plugins=DDPPlugin(find_unused_parameters=False),
+                        precision=config['train'].get('precision', 32),
+                        )
+    
     # If loaded from checkpoint - validate
     if config.get('checkpoint') is not None:
         trainer.validate(model, datamodule=dm, ckpt_path=config.get('checkpoint'))
