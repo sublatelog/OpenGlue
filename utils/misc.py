@@ -46,16 +46,16 @@ def get_inverse_transformation(transformation):
         K0, K1 = transformation['K0'], transformation['K1']
         T, R = transformation['T'], transformation['R']
         depth0, depth1 = transformation['depth0'], transformation['depth1']
-#         R_t = torch.transpose(R, 1, 2).contiguous()
-        R_t = torch.transpose(R, 2, 1).contiguous()
+        R_t = torch.transpose(R, 1, 2).contiguous()
+#         R_t = torch.transpose(R, 2, 1).contiguous()
         
         return {
             'type': transformation['type'],
             'K0': K1,
             'K1': K0,
             'R': R_t,
-            'T': -torch.matmul(R_t, T).squeeze(-1),
-#             'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1),
+#             'T': -torch.matmul(R_t, T).squeeze(-1),
+            'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1),
             'depth0': depth1,
             'depth1': depth0,
         }
@@ -104,10 +104,10 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     # multiply by corresponding depth  
     
     # torch.Size([2, 604, 3]) * torch.Size([2, 604, 3])
-    kpts_transformed = kpts_transformed * depth
+#     kpts_transformed = kpts_transformed * depth
 
     # torch.Size([2, 604, 3]) * torch.Size([2, 604, 3, 1])
-#     kpts_transformed = kpts_transformed * depth.unsqueeze(-1)
+    kpts_transformed = kpts_transformed * depth.unsqueeze(-1)
     
     # torch.Size([2, 604, 3, 1]) * torch.Size([2, 604, 3, 1])
 #     kpts_transformed = kpts_transformed.unsqueeze(-1) * depth.unsqueeze(-1)
@@ -117,26 +117,26 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
 #     print(R_t.shape)
     
     # apply (R, T)
-    # torch.Size([2, 604, 3]) * torch.Size([2, 3, 3])
-    kpts_transformed = torch.matmul(kpts_transformed, R_t)   
+#     # torch.Size([2, 604, 3]) * torch.Size([2, 3, 3])
+#     kpts_transformed = torch.matmul(kpts_transformed, R_t)   
       
-#     # torch.Size([2, 604, 3]) + torch.Size([2, 3, 1])
-#     kpts_transformed = kpts_transformed + T
+# #     # torch.Size([2, 604, 3]) + torch.Size([2, 3, 1])
+# #     kpts_transformed = kpts_transformed + T
     
-#     # torch.Size([2, 604, 3]) + torch.Size([2, 1, 3, 1])
+# #     # torch.Size([2, 604, 3]) + torch.Size([2, 1, 3, 1])
 #     kpts_transformed = kpts_transformed + T.unsqueeze(1)
     
-    # torch.Size([2, 604, 3, 1]) + torch.Size([2, 1, 3, 1])
-    kpts_transformed = kpts_transformed.unsqueeze(-1) + T.unsqueeze(1)    
+#     # torch.Size([2, 604, 3, 1]) + torch.Size([2, 1, 3, 1])
+#     kpts_transformed = kpts_transformed.unsqueeze(-1) + T.unsqueeze(1)    
     
-#     kpts_transformed = torch.matmul(kpts_transformed, R_t) + T.unsqueeze(1)
+    kpts_transformed = torch.matmul(kpts_transformed, R_t) + T.unsqueeze(1)
 
 
 
     print(kpts_transformed.shape)
     print(K1_t.shape)
     
-    
+    # torch.Size([2, 604, 3, 1]) * torch.Size([2, 3, 3])
     kpts_transformed = torch.matmul(kpts_transformed, K1_t)
     
 
