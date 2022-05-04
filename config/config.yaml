@@ -55,6 +55,6 @@ superglue:
     use_offset: False
   dustbin_score_init: 1.0
   otp:
-    num_iters: 5 # 20
+    num_iters: 20
     reg: 1.0
   residual: True
