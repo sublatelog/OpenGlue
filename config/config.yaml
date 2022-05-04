@@ -19,7 +19,7 @@ data:
 logging:
   root_path: 'logs'
   name: 'default'
-  train_logs_steps: 50
+  train_logs_steps: 5 # 50
 
 train:
   epochs: 100
