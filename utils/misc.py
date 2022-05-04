@@ -119,14 +119,18 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     # apply (R, T)
     # torch.Size([2, 604, 3]) * torch.Size([2, 3, 3])
     kpts_transformed = torch.matmul(kpts_transformed, R_t)   
+      
+#     # torch.Size([2, 604, 3]) + torch.Size([2, 3, 1])
+#     kpts_transformed = kpts_transformed + T
     
-    print(kpts_transformed.shape)
-    print(T.shape)
-    print(T.unsqueeze(1).shape)
+#     # torch.Size([2, 604, 3]) + torch.Size([2, 1, 3, 1])
+#     kpts_transformed = kpts_transformed + T.unsqueeze(1)
     
-    # torch.Size([2, 604, 3]) + torch.Size([2, 3, 1])
-    kpts_transformed = kpts_transformed + T
+    # torch.Size([2, 604, 3, 1]) + torch.Size([2, 1, 3, 1])
+    kpts_transformed = kpts_transformed.unsqueeze(-1) + T.unsqueeze(1)    
+    
 #     kpts_transformed = torch.matmul(kpts_transformed, R_t) + T.unsqueeze(1)
+
 
 
     print(kpts_transformed.shape)
