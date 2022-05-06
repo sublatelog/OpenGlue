@@ -20,28 +20,38 @@ class AccuracyUsingEpipolarDist(torchmetrics.Metric):
         R = transformation['R']
         T = transformation['T'].unsqueeze(-1)
 
+        # essentialを取得
         E = kornia.geometry.epipolar.essential_from_Rt(
-            R1=torch.eye(3, device=R.device).unsqueeze(0),
-            t1=torch.zeros(1, 3, 1, device=R.device),
-            R2=R.unsqueeze(0), t2=T.unsqueeze(0)
-        )
+                                                       R1=torch.eye(3, device=R.device).unsqueeze(0),
+                                                       t1=torch.zeros(1, 3, 1, device=R.device),
+                                                       R2=R.unsqueeze(0), 
+                                                       t2=T.unsqueeze(0)
+                                                       )
 
         num_matched_kpts = matched_kpts0.shape[0]
+        
         if num_matched_kpts > 0:
             matched_kpts0 = normalize_with_intrinsics(matched_kpts0, K0)
             matched_kpts1 = normalize_with_intrinsics(matched_kpts1, K1)
 
+            # エピポーラー幾何を取得
             epipolar_dist = kornia.geometry.epipolar.symmetrical_epipolar_distance(
-                matched_kpts0.unsqueeze(0),
-                matched_kpts1.unsqueeze(0),
-                E
-            ).squeeze(0)
-
+                                                                                    matched_kpts0.unsqueeze(0),
+                                                                                    matched_kpts1.unsqueeze(0),
+                                                                                    E
+                                                                                ).squeeze(0)
+            # 閾値以下の値の合計
             num_correct_matches = (epipolar_dist < self.threshold).sum()
+            
+            # 全体に対する割合
             precision = num_correct_matches / num_matched_kpts
+            
+            # 全キーポイントに対する正解ペアの割合
             matching_score = num_correct_matches / num_detected_kpts
         else:
             precision, matching_score = matched_kpts0.new_tensor(0.), matched_kpts0.new_tensor(0.)
+            
+            
         self.precision.append(precision)
         self.matching_score.append(matching_score)
 
