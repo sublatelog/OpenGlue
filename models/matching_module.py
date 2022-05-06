@@ -58,7 +58,7 @@ class MatchingTrainingModule(pl.LightningModule):
         # superglueの設定パラメーター'side_info_size'を設定
         # set side_info dimension based on provided laf_converter
         # 'side_info_size' = 0 + 1
-        self.superglue_config['positional_encoding']['side_info_size'] = elf.laf_converter.side_info_dim + 1  # plus 1 for responses
+        self.superglue_config['positional_encoding']['side_info_size'] = self.laf_converter.side_info_dim + 1  # plus 1 for responses
         
         # superglueの設定
         self.superglue = SuperGlue(self.superglue_config)
@@ -108,7 +108,9 @@ class MatchingTrainingModule(pl.LightningModule):
     
 
     def training_step(self, batch, batch_idx):
-        if not self.config.get('use_cached_features', False):  # if online feature detection is used
+        
+        # if online feature detection is used
+        if not self.config.get('use_cached_features', False):  
             with torch.no_grad():
                 batch = self.augment(batch)
 
@@ -122,6 +124,7 @@ class MatchingTrainingModule(pl.LightningModule):
             lafs0, responses0, desc0 = batch['lafs0'], batch['scores0'], batch['descriptors0']
             lafs1, responses1, desc1 = batch['lafs1'], batch['scores1'], batch['descriptors1']
 
+        # superglue用の設定
         log_transform_response = self.superglue_config.get('log_transform_response', False)
         
         data, y_true = generate_gt_matches(
