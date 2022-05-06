@@ -50,14 +50,37 @@ def min_stack(keypoints, side_info, descriptors):
 
         return keypoints, side_info, descriptors
 
-
+# extractor(SIFT)形式の出力をSuperGlue形式に変換
 def prepare_features_output(lafs, responses, desc, laf_converter, permute_desc=False, log_response=False):
+    
+    # SuperGlueで受け取れる形に修正する
     """Convert features output into format acceptable by SuperGlue"""
+    
     kpts = lafs[:, :, :, -1]
     responses = responses.unsqueeze(-1)
+    
+    # log変換
     if log_response:
         responses = (responses + 0.1).log()
+    
+    print("lafs")
+    print(lafs)
+    
+    print("laf_converter(lafs)")
+    print(laf_converter(lafs))
+    
+    # laf_converter(lafs):lafs.new_empty(B, N, 0)    
     side_info = torch.cat([responses, laf_converter(lafs)], dim=-1)
+    
+    print("kpts")
+    print(kpts)
+    
+    print("desc")
+    print(desc)
+    
+    print("desc.permute(0, 2, 1)")
+    print(desc.permute(0, 2, 1))
+    
     return {
         'keypoints': kpts,
         'side_info': side_info,
