@@ -20,15 +20,20 @@ def data_to_device(data, device):
 
 def reproject_keypoints(kpts, transformation):
     """Reproject batch of keypoints given corresponding transformations"""
+    
     transformation_type = transformation['type'][0]
     if transformation_type == 'perspective':
         H = transformation['H']
+        
         return perspective_transform(kpts, H)
+    
     elif transformation_type == '3d_reprojection':
         K0, K1 = transformation['K0'], transformation['K1']
         T, R = transformation['T'], transformation['R']
         depth0 = transformation['depth0']
+        
         return reproject_3d(kpts, K0, K1, T, R, depth0)
+    
     else:
         raise ValueError(f'Unknown transformation type {transformation_type}.')
 
@@ -68,10 +73,22 @@ def get_inverse_transformation(transformation):
 
 def perspective_transform(kpts, H, eps=1e-8):
     """Transform batch of keypoints given batch of homography matrices"""
+    
+    
     batch_size, num_kpts, _ = kpts.size()
+    
+    # 1の列を追加
     kpts = torch.cat([kpts, torch.ones(batch_size, num_kpts, 1, device=kpts.device)], dim=2)
-    Ht = torch.transpose(H, 1, 2).contiguous()
+    
+    Ht = torch.transpose(H, 1, 2).contiguous() # 転置
+    
+    # キーポイントを動かす
     kpts_transformed = torch.matmul(kpts, Ht)
+    
+    print("kpts_transformed")
+    print(kpts_transformed)
+    
+    # キーポイントの2列目までをキーポイントの3列目で割る
     kpts_transformed = kpts_transformed[..., :2] / (kpts_transformed[..., 2].unsqueeze(-1) + eps)
     mask = torch.ones(batch_size, num_kpts, dtype=torch.bool, device=kpts.device)  # all keypoints are valid
     return kpts_transformed, mask
@@ -79,12 +96,33 @@ def perspective_transform(kpts, H, eps=1e-8):
 
 def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     """Transform batch of keypoints given batch of relative poses and depth maps"""
+    
     batch_size, num_kpts, _ = kpts.size()
+    
+    # 1の列を追加
     kpts_hom = torch.cat([kpts, torch.ones(batch_size, num_kpts, 1, device=kpts.device)], dim=2)
 
-    K0_inv = torch.linalg.inv(K0)
+    print("K0")
+    print(K0)
+    print(K0_inv)
+    
+    # K0を転置
+    K0_inv = torch.linalg.inv(K0) 
+    
+    # K0_invを転置
     K0_inv_t = torch.transpose(K0_inv, 1, 2).contiguous()
+    
+    print("K0_inv_t")
+    print(K0_inv)
+    print(K0_inv_t)
+    
     K1_t = torch.transpose(K1, 1, 2).contiguous()
+    
+    print("K1_t")
+    print(K1)
+    print(K1_t)
+    
+    
     R_t = torch.transpose(R, 1, 2).contiguous()
 
     # transform to ray space
