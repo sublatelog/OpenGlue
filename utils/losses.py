@@ -133,19 +133,31 @@ def matched_triplet_criterion(dist, margin, indexes, mean_weights):
     return (loss0 * mean_weights).sum() + (loss1 * mean_weights).sum()
 
 
+# 各キーポイントからペア無キーポイントまでの距離の最大値をlossに設定
 def unmatched_margin_criterion(dist, margin, indexes, mean_weights, zero_to_one=True):
+    
+    # marginを認めない場合は0を返す    
     if margin is None:
         return torch.tensor(0, device=mean_weights.device)
+    
+    
+    # marginを認める場合 ↓↓↓
+    
     batch_idx, idx_kpts = indexes
 
+    # 最小値のindexを取得
     idx_kpts_closest = torch.argmin(dist, dim=2 if zero_to_one else 1)
+    
+    # 最小値のキーポイントを取得
     idx_kpts_neg = idx_kpts_closest[batch_idx, idx_kpts]
 
     # distance anchor-negative
     if zero_to_one:
+        # 各キーポイントからのペア無キーポイントまでの距離を取得
         dist_an = dist[batch_idx, idx_kpts, idx_kpts_neg]
     else:
         dist_an = dist[batch_idx, idx_kpts_neg, idx_kpts]
 
+    # ペア無キーポイントまでの距離の最大値をlossに設定
     loss = torch.maximum(-dist_an + margin, torch.tensor(0, device=dist.device))
     return (loss * mean_weights).sum()
