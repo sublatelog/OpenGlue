@@ -74,13 +74,13 @@ def main():
                         max_epochs=config['train']['epochs'],
                         accelerator="gpu", # "ddp", # ハードウェアの種類を指す: "cpu" "gpu" "tpu" "ipu" "auto"
                         gradient_clip_val=config['train']['grad_clip'],
-                        log_every_n_steps=config['logging']['train_logs_steps'],
-                        limit_train_batches=config['train']['steps_per_epoch'],
+                        log_every_n_steps=config['logging']['train_logs_steps'], # ログをとる頻度。
+                        limit_train_batches=config['train']['steps_per_epoch'], # 学習で使用するデータの割合を指定する。デバッグ等で使用する。
                         num_sanity_val_steps=0,
                         callbacks=callbacks,
                         logger=loggers,
                         plugins=DDPPlugin(find_unused_parameters=False),
-                        precision=config['train'].get('precision', 32),
+                        precision=config['train'].get('precision', 32), # 学習の小数の精度を指定。CPUでは16-bitはサポートされていない。
                         )
     
     # If loaded from checkpoint - validate
