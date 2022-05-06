@@ -121,9 +121,12 @@ def generate_gt_matches(
 
     data = {
         **data,
-        'keypoints0': kpts0, 'keypoints1': kpts1,
-        'local_descriptors0': features0['local_descriptors'], 'local_descriptors1': features1['local_descriptors'],
-        'side_info0': features0['side_info'], 'side_info1': features1['side_info'],
+        'keypoints0': kpts0, 
+        'keypoints1': kpts1,
+        'local_descriptors0': features0['local_descriptors'], 
+        'local_descriptors1': features1['local_descriptors'],
+        'side_info0': features0['side_info'], 
+        'side_info1': features1['side_info'],
     }
 
     y_true = {
