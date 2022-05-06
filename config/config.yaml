@@ -34,7 +34,7 @@ train:
   lr: 1.0e-4
   scheduler_gamma: 0.999994
   augmentations:
-    name: 'none'
+    name: 'none' # ['none', 'weak_color_aug']
 
 evaluation:
   epipolar_dist_threshold: 5.0e-4
