@@ -109,7 +109,7 @@ class MatchingTrainingModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         
-        # if online feature detection is used
+        # cacheを使わない場合
         if not self.config.get('use_cached_features', False):  
             with torch.no_grad():
                 batch = self.augment(batch)
@@ -120,13 +120,18 @@ class MatchingTrainingModule(pl.LightningModule):
 
             lafs0, responses0, desc0 = self.local_features_extractor(batch['image0'])
             lafs1, responses1, desc1 = self.local_features_extractor(batch['image1'])
+        
+        # cacheを使う場合
         else:
             lafs0, responses0, desc0 = batch['lafs0'], batch['scores0'], batch['descriptors0']
             lafs1, responses1, desc1 = batch['lafs1'], batch['scores1'], batch['descriptors1']
+            
 
         # superglue用の設定
         log_transform_response = self.superglue_config.get('log_transform_response', False)
         
+        
+        # 正解対象キーポイントを各キーポイントに対して作成
         data, y_true = generate_gt_matches(
                                             batch,
                                             prepare_features_output(lafs0, responses0, desc0, self.laf_converter, log_response=log_transform_response),
@@ -135,52 +140,83 @@ class MatchingTrainingModule(pl.LightningModule):
                                             self.config['gt_negative_threshold']
                                           )
 
+        
         # skip step if no keypoints are detected on at least one of the images
         if data is None:
             return None
+        
 
+        # 予想対象キーポイントを各キーポイントに対してsuperglueで予測
         y_pred = self.superglue(data)
 
+        # lossの計算        
+        # 'loss': (matched_loss + 0.5 * (unmatched0_loss + unmatched1_loss)) / scores.size(0),
+        # 'metric_loss': (matched_triplet_loss + unmatched0_margin_loss + unmatched1_margin_loss) / scores.size(0)
         loss = criterion(y_true, y_pred, margin=self.config['margin'])
+        
+        
+        # logを出力
         self.log('Train NLL loss', loss['loss'].detach(), prog_bar=True, sync_dist=True, on_epoch=False)
         self.log('Train Metric loss', loss['metric_loss'].detach(), prog_bar=True, sync_dist=True, on_epoch=False)
 
+        # nll_weight: 1.0
+        # metric_weight: 0.0
         return self.config['nll_weight'] * loss['loss'] + self.config['metric_weight'] * loss['metric_loss']
 
     def validation_step(self, batch, batch_idx):
         transformation = {k: v[0] for k, v in batch['transformation'].items()}
 
+        # 前処理から予測まで実行
         with torch.no_grad():
             pred = self.forward(batch)
             
+        # 予測値の取り出し
         pred = {k: v[0] for k, v in pred.items()}
         kpts0, kpts1 = pred['keypoints0'], pred['keypoints1']
         matches, conf = pred['matches0'], pred['matching_scores0']
 
+        # 閾値で選別
         matched_mask = matches > -1
         matched_kpts0 = kpts0[matched_mask]
         matched_kpts1 = kpts1[matches[matched_mask]]
 
+        # 評価
+        # AccuracyUsingEpipolarDist
         self.epipolar_dist_metric(matched_kpts0, matched_kpts1, transformation, len(kpts0))
+        
+        # CameraPoseAUC
         self.camera_pose_auc_metric(matched_kpts0, matched_kpts1, transformation)
 
-        return {'matched_kpts0': matched_kpts0, 'matched_kpts1': matched_kpts1,
-                'transformation': transformation, 'num_detected_kpts': len(kpts0)}
+        return {
+                'matched_kpts0': matched_kpts0, 
+                'matched_kpts1': matched_kpts1,
+                'transformation': transformation, 
+                'num_detected_kpts': len(kpts0)
+                }
+    
+    
 
     def on_validation_epoch_end(self):
+        # log出力
         self.log_dict(self.epipolar_dist_metric.compute(), sync_dist=True)
         self.log_dict(self.camera_pose_auc_metric.compute(), sync_dist=True)
+        
+        # metricの初期化
         self.epipolar_dist_metric.reset()
         self.camera_pose_auc_metric.reset()
+        
+        # gc
         gc.collect()
 
     def configure_optimizers(self):
+        
         optimizer = torch.optim.Adam(self.superglue.parameters(), lr=self.config['lr'])
+        
         scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer=optimizer,
-            step_size=1,
-            gamma=self.config['scheduler_gamma']
-        )
+                                                    optimizer=optimizer,
+                                                    step_size=1,
+                                                    gamma=self.config['scheduler_gamma']
+                                                    )
         return {
             'optimizer': optimizer,
             'lr_scheduler': {
