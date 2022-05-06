@@ -36,24 +36,29 @@ def reproject_keypoints(kpts, transformation):
 def get_inverse_transformation(transformation):
     transformation_type = transformation['type'][0]
     
+    # 'perspective'タイプの場合は'H'を転置
     if transformation_type == 'perspective':
         H = transformation['H']
+        
         return {
             'type': transformation['type'],
-            'H': torch.linalg.inv(H)
+            'H': torch.linalg.inv(H) # 転置
         }
+    
+    # '3d_reprojection'タイプの場合はTに転置した'R'の行列積を与える。 default:'3d_reprojection'
     elif transformation_type == '3d_reprojection':
         K0, K1 = transformation['K0'], transformation['K1']
         T, R = transformation['T'], transformation['R']
         depth0, depth1 = transformation['depth0'], transformation['depth1']
-        R_t = torch.transpose(R, 1, 2).contiguous()
+        
+        R_t = torch.transpose(R, 1, 2).contiguous() # 転置
         
         return {
             'type': transformation['type'],
             'K0': K1,
             'K1': K0,
             'R': R_t,
-            'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1),
+            'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1), T:(3,) > (3,1)にして (3,3)*(3,1)
             'depth0': depth1,
             'depth1': depth0,
         }
