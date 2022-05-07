@@ -11,9 +11,13 @@ from pytorch_lightning.plugins import DDPPlugin
 from data.megadepth_datamodule import MegaDepthPairsDataModule
 from models.matching_module import MatchingTrainingModule
 from utils.train_utils import get_training_loggers, get_training_callbacks, prepare_logging_directory
+import warnings
 
 
 def main():
+    warnings.resetwarnings()
+    warnings.simplefilter('ignore', UserWarning)
+    
     parser = argparse.ArgumentParser(description='Processing configuration for training')
     parser.add_argument('--config', type=str, help='path to config file', default='config/config.yaml')
     parser.add_argument('--features_config', type=str, help='path to config file with features', default='config/features_online/sift.yaml')
