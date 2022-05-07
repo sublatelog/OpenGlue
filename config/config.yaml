@@ -4,23 +4,18 @@ data:
   train_list_path: '/content/data/train'
   val_list_path: '/content/data/train'
   test_list_path: '/content/data/test_images'
-  
-#   root_path: '/datasets/extra_space2/ostap/MegaDepth'
-#   train_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_train_2.0.txt'
-#   val_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
-#   test_list_path: '/home/ostap/projects/superglue-lightning/assets/megadepth_valid_2.0.txt'
-
-  batch_size_per_gpu: 1 # 2
-  dataloader_workers_per_gpu: 1 # 4
-  target_size: [ 480, 854 ] # [ 960, 720 ]
-  val_max_pairs_per_scene: 5 # 50
+  batch_size_per_gpu: 1
+  dataloader_workers_per_gpu: 1
+  target_size: [ 480, 854 ]
+  val_max_pairs_per_scene: 50
   train_pairs_overlap: [0.15, 0.7]
 
 logging:
   root_path: 'logs'
   name: 'default'
-  train_logs_steps: 10 # 50
-
+  train_logs_steps: 10 # ログをとる頻度。
+  val_frequency:10000
+  
 train:
   epochs: 3 # 100
   steps_per_epoch: 100 # 10000
