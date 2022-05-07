@@ -29,8 +29,14 @@ def criterion(y_true, y_pred, margin=None):
     # 一意のリスト, index, 重複個数
     _, inv_idx, counts = torch.unique_consecutive(batch_idx, return_inverse=True, return_counts=True)
     
-    print("(1 / counts)")
-    print((1 / counts))
+    """
+    (1 / counts)
+    tensor([1.], device='cuda:0')
+    tensor([0.5000], device='cuda:0')
+    tensor([0.2500], device='cuda:0')
+    tensor([], device='cuda:0')
+    """
+
     
     # 各キーポイントの重み
     mean_weights = (1 / counts)[inv_idx]
