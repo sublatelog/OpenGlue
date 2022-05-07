@@ -65,6 +65,7 @@ def prepare_features_output(lafs, responses, desc, laf_converter, permute_desc=F
     
     """
     lafs
+    torch.Size([1, 350, 2, 3])
     tensor([[[[-5.5220e+00,  3.1881e+00,  4.6020e+01],
               [-3.1881e+00, -5.5220e+00,  2.0565e+02]],
 
@@ -86,9 +87,7 @@ def prepare_features_output(lafs, responses, desc, laf_converter, permute_desc=F
               [ 2.6462e+00, -1.5008e+01,  2.5400e+02]]]], device='cuda:0')
     """
     
-    print("lafs")
-    print(lafs.shape)
-    
+   
     """
     laf_converter(lafs)
     tensor([], device='cuda:0', size=(1, 352, 0))
@@ -99,6 +98,7 @@ def prepare_features_output(lafs, responses, desc, laf_converter, permute_desc=F
     
     """
     kpts
+    torch.Size([1, 350, 2])
     tensor([[[ 46.0198, 205.6502],
              [ 21.5761, 367.9525],
              [ 51.2985, 201.3564],
@@ -110,13 +110,10 @@ def prepare_features_output(lafs, responses, desc, laf_converter, permute_desc=F
              [ 41.1325, 294.4109],
              [ 51.0867, 224.1311],
     """
-    print("kpts")
-    print(kpts.shape)
-    
-    print("desc")
-    print(desc.shape)
+
     """
     desc
+    torch.Size([1, 350, 128])
     tensor([[[0.2047, 0.0247, 0.2047,  ..., 0.0504, 0.0615, 0.0076],
              [0.1352, 0.0392, 0.0912,  ..., 0.0385, 0.0528, 0.0440],
              [0.0300, 0.1804, 0.1788,  ..., 0.0489, 0.0453, 0.0667],
