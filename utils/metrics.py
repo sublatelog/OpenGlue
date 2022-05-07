@@ -178,74 +178,76 @@ class CameraPoseAUC(torchmetrics.Metric):
         errors = self.pose_errors
         errors = torch.sort(errors).values
         
-        print("errors")
-        print(errors)
-        print(errors.shape)
-        
-        
+        """
+        errors
+        torch.Size([1])
+        tensor([inf], device='cuda:0')
+        """
+      
         recall = (torch.arange(len(errors), device=errors.device) + 1) / len(errors)
-        
-        
-        print("recall")
-        print(recall)
+        """
+        recall
+        tensor([1.], device='cuda:0')
+        """
         
         zero = torch.zeros(1, device=errors.device)
         errors = torch.cat([zero, errors])
         recall = torch.cat([zero, recall])
+        """
+        errors
+        tensor([0., inf], device='cuda:0')
         
-        
-        print("errors")
-        print(errors)
-        
-        print("recall")
-        print(recall)
-        
-        
-        print("recall")
-        print(recall)
+        recall
+        tensor([0., 1.], device='cuda:0')
+        """
 
         aucs = {}
         # camera_auc_thresholds: [5.0, 10.0, 20.0]
         for threshold in self.auc_thresholds:
             threshold = torch.tensor(threshold).to(errors.device)
             
-        
-            print("threshold")
-            print(threshold)
+            """
+            threshold
+            tensor(5., device='cuda:0')
+            """
 
             # thresholdに一番近い値のindexを取得
             last_index = torch.searchsorted(errors, threshold)
             
-        
-            print("last_index")
-            print(last_index)
+            """
+            last_index
+            tensor(1, device='cuda:0')
+            """
             
             r = torch.cat([recall[:last_index], recall[last_index - 1].unsqueeze(0)])
-            
-            
-            print("r")
-            print(r)
-            print(r.shape)
+            """
+            r
+            tensor([0., 0.], device='cuda:0')
+            torch.Size([2])
+            """
             
             e = torch.cat([errors[:last_index], threshold.unsqueeze(0)])
             
-            
-            print("e")
-            print(e)
-            print(e.shape)
+            """
+            e
+            tensor([0., 5.], device='cuda:0')
+            torch.Size([2])
+            """
             
             # torch.trapz():台形公式は定積分を近似計算するための方法、すなわち数値積分のひとつである。
             area = torch.trapz(r, x=e) / threshold
             
-            print("torch.trapz(r, x=e)")
-            print(torch.trapz(r, x=e))
-            print(torch.trapz(r, x=e).shape)
+            """
+            torch.trapz(r, x=e)
+            tensor(0., device='cuda:0')
+            torch.Size([])
+            """
             
             aucs[f'AUC@{threshold}deg'] = area
             
-            
-        print("aucs")
-        print(aucs)
-        print(aucs.shape)
+        """
+        aucs
+        {'AUC@5.0deg': tensor(0., device='cuda:0'), 'AUC@10.0deg': tensor(0., device='cuda:0'), 'AUC@20.0deg': tensor(0., device='cuda:0')}
+        """
         
         return aucs
