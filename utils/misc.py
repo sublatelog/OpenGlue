@@ -63,7 +63,7 @@ def get_inverse_transformation(transformation):
             'K0': K1,
             'K1': K0,
             'R': R_t,
-            'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1), T:(3,) > (3,1)にして (3,3)*(3,1)
+            'T': -torch.matmul(R_t, T.unsqueeze(-1)).squeeze(-1), # T:(3,) > (3,1)にして (3,3)*(3,1)
             'depth0': depth1,
             'depth1': depth0,
         }
