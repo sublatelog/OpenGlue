@@ -38,8 +38,21 @@ def generate_gt_matches(
     # transformationのTだけ変更
     transformation_inv = get_inverse_transformation(transformation)
     
-    print("kpts0")
-    print(kpts0)
+    """
+    kpts0
+    tensor([[[309.5390, 219.1302],
+             [344.5755, 216.3512],
+             [326.8630, 217.9524],
+             [207.5000, 511.5000],
+             [328.0000, 169.1887],
+             [432.2422, 515.2451],
+             [349.5874, 222.8119],
+             [367.3845, 515.3196],
+             [340.7626, 227.1615],
+    """
+    print("kpts0_gt_matches_generation")
+    print(kpts0.shape)
+    
     
     # キーポイントの個数を取得
     num0, num1 = kpts0.size(1), kpts1.size(1)
@@ -67,12 +80,15 @@ def generate_gt_matches(
     
     print("reprojection_error_0_to_1")
     print(reprojection_error_0_to_1)
+    print(reprojection_error_0_to_1.shape)
     
     print("min_dist0")
     print(min_dist0)
+    print(min_dist0.shape)
     
     print("nn_matches0")
     print(nn_matches0)
+    print(nn_matches0.shape)
     
     # 複製   
     gt_matches0, gt_matches1 = nn_matches0.clone(), nn_matches1.clone()
