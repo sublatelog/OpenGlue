@@ -3,19 +3,31 @@ import torch.nn.functional as F
 
 
 def normalize_with_intrinsics(kpts: torch.tensor, K: torch.tensor):
+    """
+    K
+    tensor([[1.1747e+03, 0.0000e+00, 2.4050e+02],
+            [0.0000e+00, 1.1752e+03, 4.2700e+02],
+            [0.0000e+00, 0.0000e+00, 1.0000e+00]], device='cuda:0')]
+                
+    K[:2, 2]
+    tensor([240.5000, 427.0000], device='cuda:0')
     
-    print("K")
-    print(K)
+    K[[0, 1], [0, 1]] : [(0行目,1行目),(0列目,1列目)]
+    tensor([1174.7007, 1175.1849], device='cuda:0')
     
-    print("K[:2, 2]")
-    print(K[:2, 2])
+    kpts
+    tensor([[428.9090, 755.1454],
+            [462.6283, 749.3294],
+            [438.7067, 713.6786],
+            [376.3199, 836.4921]], device='cuda:0')
+
+    """
+        
+    print("kpts - K[:2, 2].unsqueeze(0)")
+    print(kpts - K[:2, 2].unsqueeze(0))    
     
-    print("K[[0, 1], [0, 1]]")
-    print(K[[0, 1], [0, 1]])
-    
-    
-    print("kpts")
-    print(kpts)
+    print("kpts0_calibrated")
+    print(kpts0_calibrated)
     
     kpts0_calibrated = (kpts - K[:2, 2].unsqueeze(0)) / K[[0, 1], [0, 1]].unsqueeze(0)
     return kpts0_calibrated
