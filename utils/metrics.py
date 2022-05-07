@@ -39,11 +39,11 @@ class AccuracyUsingEpipolarDist(torchmetrics.Metric):
                                                                                     matched_kpts0.unsqueeze(0),
                                                                                     matched_kpts1.unsqueeze(0),
                                                                                     E
-                                                                                ).squeeze(0)
+                                                                                    ).squeeze(0)
             # 閾値以下の値の合計
             num_correct_matches = (epipolar_dist < self.threshold).sum()
             
-            # 全体に対する割合
+            # 全ペアに対する正解ペアの割合
             precision = num_correct_matches / num_matched_kpts
             
             # 全キーポイントに対する正解ペアの割合
@@ -55,7 +55,9 @@ class AccuracyUsingEpipolarDist(torchmetrics.Metric):
         self.precision.append(precision)
         self.matching_score.append(matching_score)
 
+    # 全ペアに対する正解ペアの割合と全キーポイントに対する正解ペアの割合を返す
     def compute(self):
+        
         return {
             'Precision': self.precision.mean(),
             'Matching Score': self.matching_score.mean()
