@@ -13,16 +13,16 @@ data:
   batch_size_per_gpu: 1 # 2
   dataloader_workers_per_gpu: 1 # 4
   target_size: [ 480, 854 ] # [ 960, 720 ]
-  val_max_pairs_per_scene: 50
+  val_max_pairs_per_scene: 5 # 50
   train_pairs_overlap: [0.15, 0.7]
 
 logging:
   root_path: 'logs'
   name: 'default'
-  train_logs_steps: 200 # 50
+  train_logs_steps: 50 # 50
 
 train:
-  epochs: 100
+  epochs: 3 # 100
   steps_per_epoch: 100 # 10000
   grad_clip: 1 # 10.0
   precision: 32 # 16 # 32
