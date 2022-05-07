@@ -14,7 +14,7 @@ logging:
   root_path: 'logs'
   name: 'default'
   train_logs_steps: 10 # ログをとる頻度。
-  val_frequency:10000
+  val_frequency: 10000
   
 train:
   epochs: 3 # 100
