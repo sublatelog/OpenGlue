@@ -3,6 +3,20 @@ import torch.nn.functional as F
 
 
 def normalize_with_intrinsics(kpts: torch.tensor, K: torch.tensor):
+    
+    print("K")
+    print(K)
+    
+    print("K[:2, 2]")
+    print(K[:2, 2])
+    
+    print("K[[0, 1], [0, 1]]")
+    print(K[[0, 1], [0, 1]])
+    
+    
+    print("kpts")
+    print(kpts)
+    
     kpts0_calibrated = (kpts - K[:2, 2].unsqueeze(0)) / K[[0, 1], [0, 1]].unsqueeze(0)
     return kpts0_calibrated
 
