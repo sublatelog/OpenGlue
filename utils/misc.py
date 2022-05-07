@@ -102,12 +102,14 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     # 1の列を追加
     kpts_hom = torch.cat([kpts, torch.ones(batch_size, num_kpts, 1, device=kpts.device)], dim=2)
 
+    
+    # K0を転置
+    K0_inv = torch.linalg.inv(K0) 
+    
     print("K0")
     print(K0)
     print(K0_inv)
     
-    # K0を転置
-    K0_inv = torch.linalg.inv(K0) 
     
     # K0_invを転置
     K0_inv_t = torch.transpose(K0_inv, 1, 2).contiguous()
