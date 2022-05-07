@@ -181,10 +181,10 @@ class MatchingTrainingModule(pl.LightningModule):
         matched_kpts1 = kpts1[matches[matched_mask]]
 
         # 評価
-        # AccuracyUsingEpipolarDist
+        # AccuracyUsingEpipolarDist : on_validation_epoch_end()でlog出力用に設定しておく
         self.epipolar_dist_metric(matched_kpts0, matched_kpts1, transformation, len(kpts0))
         
-        # CameraPoseAUC
+        # CameraPoseAUC : on_validation_epoch_end()でlog出力用に設定しておく
         self.camera_pose_auc_metric(matched_kpts0, matched_kpts1, transformation)
 
         return {
@@ -198,8 +198,11 @@ class MatchingTrainingModule(pl.LightningModule):
 
     def on_validation_epoch_end(self):
         # log出力
-        self.log_dict(self.epipolar_dist_metric.compute(), sync_dist=True)
-        self.log_dict(self.camera_pose_auc_metric.compute(), sync_dist=True)
+         # 全ペアに対する正解ペアの割合と全キーポイントに対する正解ペアの割合を返す
+        self.log_dict(self.epipolar_dist_metric.compute(), sync_dist=True) # metrics.py > AccuracyUsingEpipolarDist()
+        
+        
+        self.log_dict(self.camera_pose_auc_metric.compute(), sync_dist=True) # metrics.py > CameraPoseAUC()
         
         # metricの初期化
         self.epipolar_dist_metric.reset()
