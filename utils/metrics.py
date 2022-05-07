@@ -76,12 +76,32 @@ class CameraPoseAUC(torchmetrics.Metric):
 
     @staticmethod
     def __rotation_error(R_true, R_pred):
+        """ 予測と正解のRの角度差 """
+        print("R_true")
+        print(R_true)
+        
+        print("R_pred")
+        print(R_pred)
+        
+        print("R_true * R_pred")
+        print(R_true * R_pred)
+        
+        print("(R_true * R_pred).sum()")
+        print((R_true * R_pred).sum())
+        
+        # torch.arccos():転置cos()
         angle = torch.arccos(torch.clip(((R_true * R_pred).sum() - 1) / 2, -1, 1))
+        
+        # torch.rad2deg():ラジアン → 度
         return torch.abs(torch.rad2deg(angle))
 
     @staticmethod
     def __translation_error(T_true, T_pred):
+        """ 予測と正解のTのコサイン類似度の角度差 """
+        
+        # torch.cosine_similarity():コサイン類似度は、ベクトルまたはテンソル、ユークリッド距離
         angle = torch.arccos(torch.cosine_similarity(T_true, T_pred, dim=0))[0]
+        
         angle = torch.abs(torch.rad2deg(angle))
         return torch.minimum(angle, 180. - angle)
 
@@ -94,20 +114,26 @@ class CameraPoseAUC(torchmetrics.Metric):
 
         # estimate essential matrix from point matches in calibrated space
         num_matched_kpts = matched_kpts0.shape[0]
+        
+        # キーポイントが5個以上ある場合のみ実行
         if num_matched_kpts >= 5:
+            
             # convert to calibrated space and move to cpu for OpenCV RANSAC
             matched_kpts0_calibrated = normalize_with_intrinsics(matched_kpts0, K0).cpu().numpy()
             matched_kpts1_calibrated = normalize_with_intrinsics(matched_kpts1, K1).cpu().numpy()
 
             threshold = 2 * self.ransac_inliers_threshold / (K0[[0, 1], [0, 1]] + K1[[0, 1], [0, 1]]).mean()
+            
+            # essentialを取得
             E, mask = cv2.findEssentialMat(
-                matched_kpts0_calibrated,
-                matched_kpts1_calibrated,
-                np.eye(3),
-                threshold=float(threshold),
-                prob=0.99999,
-                method=cv2.RANSAC
-            )
+                                            matched_kpts0_calibrated,
+                                            matched_kpts1_calibrated,
+                                            np.eye(3),
+                                            threshold=float(threshold),
+                                            prob=0.99999,
+                                            method=cv2.RANSAC
+                                            )
+            
             if E is None:
                 error = torch.tensor(np.inf).to(device)
             else:
@@ -117,21 +143,30 @@ class CameraPoseAUC(torchmetrics.Metric):
                 best_solution_n_points = -1
                 best_solution = None
                 for E_chunk in E.split(3):
+                    
                     R_pred, T_pred, points3d = kornia.geometry.epipolar.motion_from_essential_choose_solution(
-                        E_chunk, K0, K1,
-                        matched_kpts0, matched_kpts1,
-                        mask=mask
-                    )
+                                                                                                                E_chunk, 
+                                                                                                                K0, 
+                                                                                                                K1,
+                                                                                                                matched_kpts0, 
+                                                                                                                matched_kpts1,
+                                                                                                                mask=mask
+                                                                                                              )
                     n_points = points3d.size(0)
                     if n_points > best_solution_n_points:
                         best_solution_n_points = n_points
                         best_solution = (R_pred, T_pred)
+                        
                 R_pred, T_pred = best_solution
 
                 R_error, T_error = self.__rotation_error(R, R_pred), self.__translation_error(T, T_pred)
+                
+                # 各要素について両エラーで最大の値を返す
                 error = torch.maximum(R_error, T_error)
+                
         else:
             error = torch.tensor(np.inf).to(device)
+            
         self.pose_errors.append(error)
 
     def compute(self):
