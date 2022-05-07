@@ -118,25 +118,46 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
 
     
     # K0を転置
-    K0_inv = torch.linalg.inv(K0) 
+    K0_inv = torch.linalg.inv(K0) # 逆行列:正則行列に掛けると単位行列になる行列
     
-    print("K0")
-    print(K0)
-    print(K0_inv)
+    """
+    K0
+    tensor([[[863.2327,   0.0000, 306.0000],
+             [  0.0000, 864.5374, 427.0000],
+             [  0.0000,   0.0000,   1.0000]]], device='cuda:0')
+    """
+    
+    """
+    K0_inv
+    tensor([[[ 0.0012,  0.0000, -0.3545],
+             [ 0.0000,  0.0012, -0.4939],
+             [ 0.0000,  0.0000,  1.0000]]], device='cuda:0')
+    """
+
     
     
     # K0_invを転置
     K0_inv_t = torch.transpose(K0_inv, 1, 2).contiguous()
-    
-    print("K0_inv_t")
-    print(K0_inv)
-    print(K0_inv_t)
+    """ 
+    K0_inv_t         
+    tensor([[[ 0.0012,  0.0000,  0.0000],
+             [ 0.0000,  0.0012,  0.0000],
+             [-0.3545, -0.4939,  1.0000]]], device='cuda:0')         
+             
+    """
     
     K1_t = torch.transpose(K1, 1, 2).contiguous()
-    
-    print("K1_t")
-    print(K1)
-    print(K1_t)
+    """
+    K1
+    tensor([[[1.2808e+03, 0.0000e+00, 2.7700e+02],
+             [0.0000e+00, 1.2816e+03, 4.2700e+02],
+             [0.0000e+00, 0.0000e+00, 1.0000e+00]]], device='cuda:0')
+             
+    K1_t         
+    tensor([[[1.2808e+03, 0.0000e+00, 0.0000e+00],
+             [0.0000e+00, 1.2816e+03, 0.0000e+00],
+             [2.7700e+02, 4.2700e+02, 1.0000e+00]]], device='cuda:0')
+    """    
     
     
     R_t = torch.transpose(R, 1, 2).contiguous()
@@ -178,9 +199,9 @@ def reproject_3d(kpts, K0, K1, T, R, depth0, eps=1e-8):
     # T.unsqueeze(1)   : torch.Size([2, 1, 3])
     kpts_transformed = kpts_transformed + T.unsqueeze(1)
 
-#     print("kpts_transformed")    
-#     print(kpts_transformed.shape)
-#     print(K1_t.shape)
+    print("kpts_transformed")    
+    print(kpts_transformed.shape)
+    print(K1_t.shape)
 
     # kpts_transformed : torch.Size([2, 604, 3])
     # K1_t             : torch.Size([2, 3, 3])
