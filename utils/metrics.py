@@ -124,7 +124,7 @@ class CameraPoseAUC(torchmetrics.Metric):
 
             threshold = 2 * self.ransac_inliers_threshold / (K0[[0, 1], [0, 1]] + K1[[0, 1], [0, 1]]).mean()
             
-            # essentialを取得
+            # Essential Matrix (基本行列) を取得
             E, mask = cv2.findEssentialMat(
                                             matched_kpts0_calibrated,
                                             matched_kpts1_calibrated,
@@ -144,6 +144,7 @@ class CameraPoseAUC(torchmetrics.Metric):
                 best_solution = None
                 for E_chunk in E.split(3):
                     
+                    # Essential Matrix (基本行列) からＲとＴを復元
                     R_pred, T_pred, points3d = kornia.geometry.epipolar.motion_from_essential_choose_solution(
                                                                                                                 E_chunk, 
                                                                                                                 K0, 
@@ -152,6 +153,8 @@ class CameraPoseAUC(torchmetrics.Metric):
                                                                                                                 matched_kpts1,
                                                                                                                 mask=mask
                                                                                                               )
+                    
+                    # 3d point
                     n_points = points3d.size(0)
                     if n_points > best_solution_n_points:
                         best_solution_n_points = n_points
@@ -159,6 +162,7 @@ class CameraPoseAUC(torchmetrics.Metric):
                         
                 R_pred, T_pred = best_solution
 
+                # Rの角度誤差とTのコサイン類似度角度誤差を求める
                 R_error, T_error = self.__rotation_error(R, R_pred), self.__translation_error(T, T_pred)
                 
                 # 各要素について両エラーで最大の値を返す
@@ -168,21 +172,80 @@ class CameraPoseAUC(torchmetrics.Metric):
             error = torch.tensor(np.inf).to(device)
             
         self.pose_errors.append(error)
+        
 
     def compute(self):
         errors = self.pose_errors
         errors = torch.sort(errors).values
+        
+        print("errors")
+        print(errors)
+        print(errors.shape)
+        
+        
         recall = (torch.arange(len(errors), device=errors.device) + 1) / len(errors)
+        
+        
+        print("recall")
+        print(recall)
+        
         zero = torch.zeros(1, device=errors.device)
         errors = torch.cat([zero, errors])
         recall = torch.cat([zero, recall])
+        
+        
+        print("errors")
+        print(errors)
+        
+        print("recall")
+        print(recall)
+        
+        
+        print("recall")
+        print(recall)
 
         aucs = {}
+        # camera_auc_thresholds: [5.0, 10.0, 20.0]
         for threshold in self.auc_thresholds:
             threshold = torch.tensor(threshold).to(errors.device)
+            
+        
+            print("threshold")
+            print(threshold)
+
+            # thresholdに一番近い値のindexを取得
             last_index = torch.searchsorted(errors, threshold)
+            
+        
+            print("last_index")
+            print(last_index)
+            
             r = torch.cat([recall[:last_index], recall[last_index - 1].unsqueeze(0)])
+            
+            
+            print("r")
+            print(r)
+            print(r.shape)
+            
             e = torch.cat([errors[:last_index], threshold.unsqueeze(0)])
+            
+            
+            print("e")
+            print(e)
+            print(e.shape)
+            
+            # torch.trapz():台形公式は定積分を近似計算するための方法、すなわち数値積分のひとつである。
             area = torch.trapz(r, x=e) / threshold
+            
+            print("torch.trapz(r, x=e)")
+            print(torch.trapz(r, x=e))
+            print(torch.trapz(r, x=e).shape)
+            
             aucs[f'AUC@{threshold}deg'] = area
+            
+            
+        print("aucs")
+        print(aucs)
+        print(aucs.shape)
+        
         return aucs
