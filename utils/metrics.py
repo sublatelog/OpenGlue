@@ -77,17 +77,27 @@ class CameraPoseAUC(torchmetrics.Metric):
     @staticmethod
     def __rotation_error(R_true, R_pred):
         """ 予測と正解のRの角度差 """
-        print("R_true")
-        print(R_true)
         
-        print("R_pred")
-        print(R_pred)
-        
-        print("R_true * R_pred")
-        print(R_true * R_pred)
-        
-        print("(R_true * R_pred).sum()")
-        print((R_true * R_pred).sum())
+        """
+        R_true
+        tensor([[ 0.9961, -0.0290, -0.0830],
+                [ 0.0283,  0.9996, -0.0088],
+                [ 0.0833,  0.0064,  0.9965]], device='cuda:0')
+                
+        R_pred
+        tensor([[-0.8351,  0.5485, -0.0429],
+                [-0.5489, -0.8255,  0.1314],
+                [ 0.0366,  0.1333,  0.9904]], device='cuda:0')
+                
+        R_true * R_pred
+        tensor([[-8.3184e-01, -1.5889e-02,  3.5654e-03],
+                [-1.5554e-02, -8.2512e-01, -1.1561e-03],
+                [ 3.0487e-03,  8.5468e-04,  9.8694e-01]], device='cuda:0')
+                
+        (R_true * R_pred).sum()
+        tensor(-0.6951, device='cuda:0')
+        """
+
         
         # torch.arccos():転置cos()
         angle = torch.arccos(torch.clip(((R_true * R_pred).sum() - 1) / 2, -1, 1))
