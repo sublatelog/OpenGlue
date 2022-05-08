@@ -12,6 +12,23 @@ def criterion(y_true, y_pred, margin=None):
     gdesc0, gdesc1, scores = y_pred['context_descriptors0'], y_pred['context_descriptors1'], y_pred['scores']
     
     
+    print("gt_matches0")
+    print(gt_matches0)
+    
+    print("gdesc0")
+    print(gdesc0)
+    
+    
+    print("gt_matches1")
+    print(gt_matches1)
+    
+    
+    print("gdesc1")
+    print(gdesc1)
+    
+    print("scores")
+    print(scores)
+    
     # ペア有triplet_loss ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
     
     # marginを認める場合は2つの画像のgdescのcosine距離を計算
@@ -36,10 +53,26 @@ def criterion(y_true, y_pred, margin=None):
     tensor([0.2500], device='cuda:0')
     tensor([], device='cuda:0')
     """
+    
+    
+    
 
     
     # 各キーポイントの重み
     mean_weights = (1 / counts)[inv_idx]
+    
+    
+    
+    print("mean_weights")
+    print(mean_weights)
+    
+    print("(1 / counts)")
+    print((1 / counts))
+    
+    print("inv_idx")
+    print(inv_idx)
+    
+    
 
     # スコアを重み付けして合算
     matched_loss = (-scores[batch_idx, idx_kpts0, idx_kpts1] * mean_weights).sum()
