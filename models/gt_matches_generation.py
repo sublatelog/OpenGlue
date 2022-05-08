@@ -51,10 +51,20 @@ def generate_gt_matches(
              [367.3845, 515.3196],
              [340.7626, 227.1615],
     """
+    
+    
+    print("kpts1")
+    print(kpts1)
+    print(kpts1.shape)
        
     
     # キーポイントの個数を取得
     num0, num1 = kpts0.size(1), kpts1.size(1)
+    
+    print("num0")
+    print(num0)
+    print("num1")
+    print(num1)
 
     # skip step if no keypoint are detected
     if num0 == 0 or num1 == 0:
@@ -163,6 +173,17 @@ def generate_gt_matches(
         'side_info0': features0['side_info'], 
         'side_info1': features1['side_info'],
     }
+    
+    
+    print("gt_matches0")
+    print(gt_matches0)
+    print(gt_matches0.shape)
+    
+    
+    print("gt_matches1")
+    print(gt_matches1)
+    print(gt_matches1.shape)
+    
 
     y_true = {
         'gt_matches0': gt_matches0, 'gt_matches1': gt_matches1
