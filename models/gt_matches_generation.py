@@ -128,21 +128,26 @@ def generate_gt_matches(
              243, 243, 243, 243, 243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
              243, 243, 243, 243,  76, 243, 243, 243, 243, 243, 243,  76, 243, 243,
   
-    
-    
+    nn_matches1
+    torch.Size([1, 639])
+    tensor([[371, 154, 154, 154, 356, 154, 371, 627, 627, 356, 154, 154, 154, 305,
+             667, 627, 154, 305, 305, 305, 127, 305, 371, 371, 627, 131, 627, 154,
+             667, 154, 154, 627, 131, 627, 627, 356, 667, 154, 667, 305, 667, 627,
+             627, 371, 305, 667, 131, 667, 627, 627, 154, 667, 127, 305, 667, 154,
+              30,  30, 127, 627, 667, 154, 627, 627, 371, 356, 371, 667, 667, 627,
+             627, 305, 627, 627, 627, 127, 667, 356, 667, 154, 667, 305, 627, 667,
+             627, 627, 627, 667, 667, 627, 363, 627, 153]], device='cuda:0')
+
     """
-    
-    print("nn_matches1")
-    print(nn_matches1)
-    print(nn_matches1.shape)
+
     
     # 複製   
     gt_matches0, gt_matches1 = nn_matches0.clone(), nn_matches1.clone()
     device = gt_matches0.device
     
-    
+    # gt_matches0の行最小値列indexでgt_matches1の
     cross_check_consistent0 = torch.arange(num0, device=device).unsqueeze(0) == gt_matches1.gather(1, gt_matches0)
-    
+    gt_matches0[~cross_check_consistent0] = UNMATCHED_INDEX # -1
     """
     torch.arange(num0, device=device).unsqueeze(0)
     torch.Size([1, 787])
@@ -160,14 +165,21 @@ def generate_gt_matches(
              502, 677, 502, 502, 677, 677, 502, 502, 502, 502, 502, 502, 502, 502,          
              502, 502, 502, 502, 502, 502, 502, 502, 502, 502, 502, 502, 502, 502,
              502, 502, 502]], device='cuda:0')
+             
+    cross_check_consistent0
+    torch.Size([1, 674])
+    tensor([[False, False, False, False, False, False, False, False, False, False,
+             False, False, False, False, False, False,  True, False, False, False,
+             False, False, False, False, False, False, False, False, False, False,
+             False, False, False, False, False, False, False, False, False, False,
+             False, False, False, False, False, False, False, False, False, False,
+             False, False, False, False, False, False, False, False, False, False,
+             False, False, False, False, False, False, False, False, False, False,
+             False, False, False, False, False, False, False, False, False, False,          
               
     """
     
-    print("cross_check_consistent0")
-    print(cross_check_consistent0)
-    print(cross_check_consistent0.shape)
-    
-    gt_matches0[~cross_check_consistent0] = UNMATCHED_INDEX # -1
+
 
     cross_check_consistent1 = torch.arange(num1, device=device).unsqueeze(0) == gt_matches0.gather(1, gt_matches1)
     gt_matches1[~cross_check_consistent1] = UNMATCHED_INDEX
