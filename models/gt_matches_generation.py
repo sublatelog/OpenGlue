@@ -92,8 +92,8 @@ def generate_gt_matches(
     # torch.cdist:ノルム距離を計算　kpts1_transformed == kpts0　正解位置と対称予測位置
     reprojection_error_1_to_0 = torch.cdist(kpts1_transformed, kpts0, p=2)  # batch_size x num1 x num0
 
-    # ノルム距離誤差の列方向での最小値
-    min_dist0, nn_matches0 = reprojection_error_0_to_1.min(2)  # batch_size x num0
+    # ノルム距離誤差の行単位での最小値 ([1, 407, 342]) > ([1, 407])
+    min_dist0, nn_matches0 = reprojection_error_0_to_1.min(2)  # batch_size x num0 (min, min_indices)
     min_dist1, nn_matches1 = reprojection_error_1_to_0.min(2)  # batch_size x num1
     
     """
@@ -108,7 +108,7 @@ def generate_gt_matches(
              [553.9631, 517.8069, 411.9433,  ..., 373.6161, 376.8466, 346.2145]]],
            device='cuda:0')
 
-    min_dist0
+    min_dist0:min
     torch.Size([1, 407])
     tensor([[495.2804, 280.5597, 410.6893, 264.6145, 313.4991, 508.4745, 509.9016,
              364.5308, 512.9706, 205.5891, 249.4042, 437.8380, 202.8465, 389.0567,
@@ -119,7 +119,7 @@ def generate_gt_matches(
              373.3811, 302.3147, 367.6788, 305.8423, 250.9976, 268.4193, 204.4420,
     
     
-    nn_matches0
+    nn_matches0:min_indices
     torch.Size([1, 407])
     tensor([[ 76,  76,  76, 243, 243,  76,  76, 243,  76,  76, 243,  76, 243, 243,
               76,  76,  76, 243, 243, 243,  76,  76, 243, 243, 243, 243,  76, 243,
@@ -138,7 +138,7 @@ def generate_gt_matches(
     
     
     cross_check_consistent0 = torch.arange(num0, device=device).unsqueeze(0) == gt_matches1.gather(1, gt_matches0)
-    gt_matches0[~cross_check_consistent0] = UNMATCHED_INDEX
+    gt_matches0[~cross_check_consistent0] = UNMATCHED_INDEX # -1
 
     cross_check_consistent1 = torch.arange(num1, device=device).unsqueeze(0) == gt_matches0.gather(1, gt_matches1)
     gt_matches1[~cross_check_consistent1] = UNMATCHED_INDEX
@@ -149,7 +149,7 @@ def generate_gt_matches(
     symmetric_dist = 0.5 * (min_dist0[cross_check_consistent0] + min_dist1[cross_check_consistent1])
 
     # 平均距離がポジティブ閾値以上の場合は
-    gt_matches0[cross_check_consistent0][symmetric_dist > positive_threshold] = IGNORE_INDEX
+    gt_matches0[cross_check_consistent0][symmetric_dist > positive_threshold] = IGNORE_INDEX # -2
     
     # 平均距離がネガティブ閾値以上
     gt_matches0[cross_check_consistent0][symmetric_dist > negative_threshold] = UNMATCHED_INDEX
