@@ -14,20 +14,25 @@ def criterion(y_true, y_pred, margin=None):
     
     print("gt_matches0")
     print(gt_matches0)
+    print(gt_matches0.shape)
     
     print("gdesc0")
     print(gdesc0)
+    print(gdesc0.shape)
     
     
     print("gt_matches1")
     print(gt_matches1)
+    print(gt_matches1.shape)
     
     
     print("gdesc1")
     print(gdesc1)
+    print(gdesc1.shape)
     
     print("scores")
     print(scores)
+    print(scores.shape)
     
     # ペア有triplet_loss ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
     
