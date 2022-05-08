@@ -24,8 +24,8 @@ train:
   gt_positive_threshold: 2
   gt_negative_threshold: 7
   margin: null
-  nll_weight: 1.0
-  metric_weight: 0.0
+  nll_weight: 0.8
+  metric_weight: 0.2
   lr: 1.0e-4
   scheduler_gamma: 0.999994
   augmentations:
