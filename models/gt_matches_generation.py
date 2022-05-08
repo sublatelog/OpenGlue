@@ -138,6 +138,15 @@ def generate_gt_matches(
     
     
     cross_check_consistent0 = torch.arange(num0, device=device).unsqueeze(0) == gt_matches1.gather(1, gt_matches0)
+    
+    print("torch.arange(num0, device=device).unsqueeze(0)")
+    print(torch.arange(num0, device=device).unsqueeze(0))
+    print(torch.arange(num0, device=device).unsqueeze(0).shape)
+    
+    print("gt_matches1.gather(1, gt_matches0)")
+    print(gt_matches1.gather(1, gt_matches0))
+    print(gt_matches1.gather(1, gt_matches0).shape)
+    
     gt_matches0[~cross_check_consistent0] = UNMATCHED_INDEX # -1
 
     cross_check_consistent1 = torch.arange(num1, device=device).unsqueeze(0) == gt_matches0.gather(1, gt_matches1)
@@ -185,9 +194,9 @@ def generate_gt_matches(
     }
     
     
-    print("gt_matches0")
-    print(gt_matches0)
-    print(gt_matches0.shape)
+#     print("gt_matches0")
+#     print(gt_matches0)
+#     print(gt_matches0.shape)
     
     
     print("gt_matches1")
