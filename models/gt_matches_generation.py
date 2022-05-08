@@ -18,8 +18,8 @@ def generate_gt_matches(
                         data: Dict[str, Any],
                         features0: Dict[str, torch.Tensor],
                         features1: Dict[str, torch.Tensor],
-                        positive_threshold: float,
-                        negative_threshold: Optional[float] = None
+                        positive_threshold: float,                    # gt_positive_threshold: 2  
+                        negative_threshold: Optional[float] = None    # gt_negative_threshold: 7
                         ) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, torch.Tensor]]]:
   
     """Given image pair, keypoints detected in each image, return set of ground truth correspondences"""
