@@ -52,19 +52,27 @@ def generate_gt_matches(
              [340.7626, 227.1615],
     """
     
-    
-    print("kpts1")
-    print(kpts1)
-    print(kpts1.shape)
+    """
+    kpts1
+    torch.Size([1, 639, 2])
+    tensor([[[223.8122, 329.9168],
+             [281.6742, 344.0130],
+             [251.0376, 332.2923],
+             ...,
+             [119.0000,  70.0000],
+             [450.2680, 592.3522],
+             [185.7256, 755.5035]]], device='cuda:0')
+    """
        
     
     # キーポイントの個数を取得
     num0, num1 = kpts0.size(1), kpts1.size(1)
-    
-    print("num0")
-    print(num0)
-    print("num1")
-    print(num1)
+    """
+    num0
+    674
+    num1
+    639
+    """
 
     # skip step if no keypoint are detected
     if num0 == 0 or num1 == 0:
@@ -75,6 +83,8 @@ def generate_gt_matches(
     # establish ground truth correspondences given transformation
     kpts0_transformed, mask0 = reproject_keypoints(kpts0, transformation)
     kpts1_transformed, mask1 = reproject_keypoints(kpts1, transformation_inv)
+    
+    
     
     # torch.cdist:ノルム距離を計算　kpts0_transformed == kpts1　正解位置と対称予測位置
     reprojection_error_0_to_1 = torch.cdist(kpts0_transformed, kpts1, p=2)  # batch_size x num0 x num1
