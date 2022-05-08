@@ -132,6 +132,10 @@ def generate_gt_matches(
     
     """
     
+    print("nn_matches1")
+    print(nn_matches1)
+    print(nn_matches1.shape)
+    
     # 複製   
     gt_matches0, gt_matches1 = nn_matches0.clone(), nn_matches1.clone()
     device = gt_matches0.device
