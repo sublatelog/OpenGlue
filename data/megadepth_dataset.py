@@ -138,12 +138,13 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 
         
         """
-
+        
         R1_t = torch.transpose(R1, 0, 1).contiguous()
         R = torch.matmul(R0, R1_t)
         
-        T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
-        T = torch.matmul(T0.unsqueeze(-1), T1_t).squeeze(-1)
+#         T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
+#         T = torch.matmul(T0.unsqueeze(-1), T1_t).squeeze(-1)
+        T = T0 * T1
         
         print("T")
         print(T)
