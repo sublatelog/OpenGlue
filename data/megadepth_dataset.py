@@ -135,8 +135,6 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         T1
         [1.659208  0.8268426 2.7848856]
         (3,)
-
-        
         """
         
         R1_t = torch.transpose(R1, 0, 1).contiguous()
@@ -144,7 +142,8 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         
 #         T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
 #         T = torch.matmul(T0.unsqueeze(-1), T1_t).squeeze(-1)
-        T = (T0 + T1).detach().numpy().copy()
+#         T = (T0 + T1).detach().numpy().copy()
+        T = torch.matmul(T0, T1)
         
         print("T")
         print(T)
