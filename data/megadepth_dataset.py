@@ -125,19 +125,24 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 #         K0_inv = torch.linalg.inv(K0)
 #         K0_inv_t = torch.transpose(K0_inv, 1, 2).contiguous()
         
-        print("R1")
-        print(R1)
-        print(R1.shape)
+        """
+        R1
+        [[ 0.9931465  -0.064502   -0.09746581]
+         [ 0.05923886  0.9966739  -0.05596409]
+         [ 0.10075142  0.04980678  0.99366415]]
+        (3, 3)
         
-        
-        print("T1")
-        print(T1)
-        print(T1.shape)
+        T1
+        [1.659208  0.8268426 2.7848856]
+        (3,)
 
-        R1_t = torch.transpose(R1, 1, 2).contiguous()
+        
+        """
+
+        R1_t = torch.transpose(R1, 0, 1).contiguous()
         R = torch.matmul(R0, R1_t)
         
-        T1_t = torch.transpose(T1.unsqueeze(-1), 1, 2).contiguous()
+        T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
         T = torch.matmul(T0.unsqueeze(-1), T1_t).squeeze(-1)
         
         print("T")
