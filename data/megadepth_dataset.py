@@ -154,7 +154,8 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 #         T = (T0 + T1).detach().numpy().copy()
 #         T = torch.matmul(T1_t, T0.unsqueeze(-1)).detach().numpy().copy()
 #         T = torch.matmul(T1, np.linalg.inv(T0)).detach().numpy().copy()
-        T = (T1 - np.dot(R, T0)).flatten()
+#         T = (T1 - np.dot(R, T0)).flatten()
+        T = (T1 - np.dot(R, T0)).reshape(3, )
         print("T")
         print(T)
         
