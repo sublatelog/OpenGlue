@@ -117,10 +117,10 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         
         K0 = np.array(K0.split(" ")).astype(np.float32).reshape(3, 3)
         K1 = np.array(K1.split(" ")).astype(np.float32).reshape(3, 3)
-        R0 = np.array(R0.split(" ")).astype(np.float32).reshape(3, 3)
-        R1 = np.array(R1.split(" ")).astype(np.float32).reshape(3, 3)
-        T0 = np.array(T0.split(" ")).astype(np.float32) # T0.shape : (3,)
-        T1 = np.array(T1.split(" ")).astype(np.float32) # T0.shape : (3,)
+        R0 = torch.from_numpy(np.array(R0.split(" ")).astype(np.float32).reshape(3, 3))
+        R1 = torch.from_numpy(np.array(R1.split(" ")).astype(np.float32).reshape(3, 3))
+        T0 = torch.from_numpy(np.array(T0.split(" ")).astype(np.float32)) # T0.shape : (3,)
+        T1 = torch.from_numpy(np.array(T1.split(" ")).astype(np.float32)) # T0.shape : (3,)
         
 #         K0_inv = torch.linalg.inv(K0)
 #         K0_inv_t = torch.transpose(K0_inv, 1, 2).contiguous()
@@ -140,11 +140,11 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
         """
         
         R1_t = torch.transpose(R1, 0, 1).contiguous()
-        R = torch.matmul(R0, R1_t)
+        R = torch.matmul(R0, R1_t).detach().numpy().copy()
         
 #         T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
 #         T = torch.matmul(T0.unsqueeze(-1), T1_t).squeeze(-1)
-        T = T0 * T1
+        T = (T0 * T1).detach().numpy().copy()
         
         print("T")
         print(T)
