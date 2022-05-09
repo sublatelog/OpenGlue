@@ -149,17 +149,12 @@ class BaseMegaDepthPairsDataset(torch.utils.data.Dataset):
 #         print(T0.shape)
 #         print(T1.shape)
         
-#         T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
+        T1_t = torch.transpose(T1.unsqueeze(-1), 0, 1).contiguous()
 #         T = torch.matmul(T0.unsqueeze(-1), T1_t).squeeze(-1)
 #         T = (T0 + T1).detach().numpy().copy()
-        T = torch.matmul(T0.unsqueeze(-1), T1.unsqueeze(-1)).detach().numpy().copy()
+        T = torch.matmul(T0.unsqueeze(-1), T1_t).detach().numpy().copy()
     
         print("T")
-        print(T0)
-        print(T0.shape)
-        print(T1)
-        print(T1.shape)
-        print(torch.matmul(T0, T1).shape)
         print(T)
         
         return img0_name + ".jpg", img1_name + ".jpg", K0, K1, R, T, float(overlap)
