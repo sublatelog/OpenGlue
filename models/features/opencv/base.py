@@ -12,9 +12,15 @@ from scipy.spatial import KDTree
 
 
 class OpenCVFeatures:
-    def __init__(self, features: cv2.Feature2D, max_keypoints: int = -1,
-                 nms_diameter: float = 9., normalize_desc: bool = True, root_norm: bool = True,
-                 laf_scale_mr_size: Optional[float] = 6.0):
+    def __init__(self, 
+                 features: cv2.Feature2D, 
+                 max_keypoints: int = -1,
+                 nms_diameter: float = 9., 
+                 normalize_desc: bool = True, 
+                 root_norm: bool = True,
+                 laf_scale_mr_size: Optional[float] = 6.0
+                ):
+        
         self.features = features
 
         self.max_keypoints = max_keypoints
@@ -48,8 +54,11 @@ class OpenCVFeatures:
             descriptors /= norm
         return descriptors
 
+    
+    # sin、cosで角度を表現
     @staticmethod
-    def lafs_from_opencv_kpts(kpts: Iterable[cv2.KeyPoint],
+    def lafs_from_opencv_kpts(
+                              kpts: Iterable[cv2.KeyPoint],
                               mr_size: float = 6.0,
                               with_resp: bool = False) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """
@@ -70,16 +79,20 @@ class OpenCVFeatures:
         xy = np.array([k.pt for k in kpts], dtype=np.float32)
         scales = np.array([mr_size * k.size for k in kpts], dtype=np.float32)
         angles = np.array([k.angle for k in kpts], dtype=np.float32)
+        
         # if angles are not set, make them 0
         if np.allclose(angles, -1.):
             angles = np.zeros_like(scales, dtype=np.float32)
+            
         angles = np.deg2rad(-angles)
 
         n = xy.shape[0]
         lafs = np.empty((n, 2, 3), dtype=np.float32)
         lafs[:, :, 2] = xy
+        
         s_cos_t = scales * np.cos(angles)
         s_sin_t = scales * np.sin(angles)
+        
         lafs[:, 0, 0] = s_cos_t
         lafs[:, 0, 1] = s_sin_t
         lafs[:, 1, 0] = -s_sin_t
@@ -101,8 +114,14 @@ class OpenCVFeatures:
             scores: array (N,) of corresponding detector responses
             descriptors: array (N, 128) of descriptors
         """
-        kpts, scores, descriptors = detect_kpts_opencv(self.features, image, self.nms_radius, self.max_keypoints,
-                                                       describe=True)
+        kpts, scores, descriptors = detect_kpts_opencv(
+                                                       self.features, 
+                                                       image, 
+                                                       self.nms_radius, 
+                                                       self.max_keypoints,
+                                                       describe=True
+                                                      )
+        
         lafs = self.lafs_from_opencv_kpts(kpts, mr_size=self.laf_scale_mr_size, with_resp=False)
 
         if self.normalize_desc:
@@ -152,6 +171,7 @@ def detect_kpts_opencv(
     kpts = kpts[nms_mask]
 
     if max_keypoints > 0:
+        # np.argpartition():配列の要素のうち、任意の値k を基準にして、それより小さい値を左側に、それより大きい値を右側に再配置した際のインダイスを取得する関数
         top_score_idx = np.argpartition(-responses, min(max_keypoints, len(responses) - 1))[:max_keypoints]
     else:
         # select all
