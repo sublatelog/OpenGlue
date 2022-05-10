@@ -18,9 +18,14 @@ class SuperPointNet(nn.Module):
     Original paper: https://arxiv.org/abs/1712.07629
     """
 
-    def __init__(self, max_keypoints: int = -1, descriptor_dim: int = 256, nms_kernel: int = 9,
-                 remove_borders_size: int = 4, keypoint_threshold: float = 0.0,
-                 weights: Optional[Union[str, pathlib.Path]] = None):
+    def __init__(self, 
+                 max_keypoints: int = -1, 
+                 descriptor_dim: int = 256, 
+                 nms_kernel: int = 9,
+                 remove_borders_size: int = 4, 
+                 keypoint_threshold: float = 0.0,
+                 weights: Optional[Union[str, pathlib.Path]] = None
+                ):
         super().__init__()
 
         self.max_keypoints = max_keypoints
@@ -89,9 +94,9 @@ class SuperPointNet(nn.Module):
 
         # Applying non-maximum suppression for filtering keypoints scores
         scores = nms2d(scores.unsqueeze(1), kernel_size=(self.nms_kernel, self.nms_kernel)).squeeze(1)
-        keypoints = [
-            torch.nonzero(F.threshold(s, self.keypoint_threshold, 0.))
-            for s in scores]
+        
+        keypoints = [torch.nonzero(F.threshold(s, self.keypoint_threshold, 0.)) for s in scores]
+        
         scores = [s[tuple(k.t())] for s, k in zip(scores, keypoints)]
 
         # Filter top-k keypoints, and remove those close to the borders
@@ -106,13 +111,13 @@ class SuperPointNet(nn.Module):
                 ]
             )
         )
+        
         # Convert (h, w) to (x, y)
         keypoints = [torch.flip(k, [1]).float() for k in keypoints]
 
         descriptors = [
-            sample_desc_from_points(k[None], d[None], 8)[0].transpose(0, 1)
-            for k, d in zip(keypoints, descriptors)
-        ]
+                       sample_desc_from_points(k[None], d[None], 8)[0].transpose(0, 1) for k, d in zip(keypoints, descriptors)
+                      ]
 
         # Downscale to the same number of keypoints for each image to fit in a batch
         keypoints, scores, descriptors = min_stack(keypoints, scores, descriptors)
@@ -120,27 +125,45 @@ class SuperPointNet(nn.Module):
         # Converting keypoints to lafs
         # Set scale to 1
         lafs = torch.cat([
-            torch.eye(2, device=keypoints.device, dtype=keypoints.dtype).unsqueeze(0).unsqueeze(1).expand(
-                keypoints.size(0), keypoints.size(1), -1, -1
-            ),
-            keypoints.unsqueeze(-1),
-        ], dim=-1)
+                          torch.eye(
+                                    2, 
+                                    device=keypoints.device, 
+                                    dtype=keypoints.dtype
+                                   ).unsqueeze(0).unsqueeze(1).expand(
+                                                                      keypoints.size(0), 
+                                                                      keypoints.size(1), 
+                                                                      -1, 
+                                                                      -1
+                                                                      ),
+                         keypoints.unsqueeze(-1),
+                         ], dim=-1)
 
         return lafs, scores, descriptors
 
 
 class SuperPointNetBn(SuperPointNet):
-    def __init__(self, max_keypoints: int = -1, descriptor_dim: int = 256, nms_kernel: int = 9,
-                 remove_borders_size: int = 4, keypoint_threshold: float = 0.0,
-                 weights: Optional[Union[str, pathlib.Path]] = None):
+    def __init__(self, 
+                 max_keypoints: int = -1, 
+                 descriptor_dim: int = 256, 
+                 nms_kernel: int = 9,
+                 remove_borders_size: int = 4, 
+                 keypoint_threshold: float = 0.0,
+                 weights: Optional[Union[str, pathlib.Path]] = None
+                ):
 
-        super().__init__(max_keypoints, descriptor_dim, nms_kernel, remove_borders_size,
-                         keypoint_threshold, weights=None)
+        super().__init__(max_keypoints, 
+                         descriptor_dim, 
+                         nms_kernel, 
+                         remove_borders_size,
+                         keypoint_threshold, 
+                         weights=None
+                        )
 
         # Add batch norm layers
         for i, channels in enumerate(self.layers_channels):
             setattr(self, "bn{}a".format(i + 1), bn(channels[1]))
             setattr(self, "bn{}b".format(i + 1), bn(channels[3]))
+            
         self.bnPa = bn(256)
         self.bnPb = bn(65)
         self.bnDa = bn(256)
@@ -151,23 +174,23 @@ class SuperPointNetBn(SuperPointNet):
     @staticmethod
     def rename_weights_keys(state_dict):
         for key in list(state_dict.keys()):
-            state_dict[key.replace(
-                'inc.conv.conv.0', 'conv1a').replace(
-                'inc.conv.conv.1', 'bn1a').replace(
-                'inc.conv.conv.3', 'conv1b').replace(
-                'inc.conv.conv.4', 'bn1b').replace(
-                'down1.mpconv.1.conv.0', 'conv2a').replace(
-                'down1.mpconv.1.conv.1', 'bn2a').replace(
-                'down1.mpconv.1.conv.3', 'conv2b').replace(
-                'down1.mpconv.1.conv.4', 'bn2b').replace(
-                'down2.mpconv.1.conv.0', 'conv3a').replace(
-                'down2.mpconv.1.conv.1', 'bn3a').replace(
-                'down2.mpconv.1.conv.3', 'conv3b').replace(
-                'down2.mpconv.1.conv.4', 'bn3b').replace(
-                'down3.mpconv.1.conv.0', 'conv4a').replace(
-                'down3.mpconv.1.conv.1', 'bn4a').replace(
-                'down3.mpconv.1.conv.3', 'conv4b').replace(
-                'down3.mpconv.1.conv.4', 'bn4b')] = state_dict.pop(key)
+            state_dict[key.replace('inc.conv.conv.0', 'conv1a') \ 
+                       .replace('inc.conv.conv.1', 'bn1a') \ 
+                       .replace('inc.conv.conv.3', 'conv1b') \ 
+                       .replace('inc.conv.conv.4', 'bn1b') \ 
+                       .replace('down1.mpconv.1.conv.0', 'conv2a') \ 
+                       .replace('down1.mpconv.1.conv.1', 'bn2a') \ 
+                       .replace('down1.mpconv.1.conv.3', 'conv2b') \ 
+                       .replace('down1.mpconv.1.conv.4', 'bn2b') \ 
+                       .replace('down2.mpconv.1.conv.0', 'conv3a') \ 
+                       .replace('down2.mpconv.1.conv.1', 'bn3a') \ 
+                       .replace('down2.mpconv.1.conv.3', 'conv3b') \ 
+                       .replace('down2.mpconv.1.conv.4', 'bn3b') \ 
+                       .replace('down3.mpconv.1.conv.0', 'conv4a') \ 
+                       .replace('down3.mpconv.1.conv.1', 'bn4a') \ 
+                       .replace('down3.mpconv.1.conv.3', 'conv4b') \ 
+                       .replace('down3.mpconv.1.conv.4', 'bn4b') \ 
+                      ] = state_dict.pop(key)
         return state_dict
 
     def _load_weights(self, weights: Optional[Union[str, pathlib.Path]] = None):
