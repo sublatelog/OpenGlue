@@ -114,8 +114,13 @@ class OpenCVFeatures:
         return f'OpenCVFeatures(features={type(self.features)})'
 
 
-def detect_kpts_opencv(features: cv2.Feature2D, image: np.ndarray, nms_radius: float, max_keypoints: int,
-                       describe: bool = False) -> np.ndarray:
+def detect_kpts_opencv(
+                       features: cv2.Feature2D, 
+                       image: np.ndarray, 
+                       nms_radius: float, 
+                       max_keypoints: int,
+                       describe: bool = False
+                      ) -> np.ndarray:
     """
     Detect keypoints using OpenCV Detector. Optionally, perform NMS and filter top-response keypoints.
     Optionally perform description.
@@ -160,20 +165,30 @@ def detect_kpts_opencv(features: cv2.Feature2D, image: np.ndarray, nms_radius: f
 
 def nms_keypoints(kpts: np.ndarray, responses: np.ndarray, radius: float) -> np.ndarray:
     # TODO: add approximate tree
+    
+    # scipy.KDTree:各点の距離を計算する
     kd_tree = KDTree(kpts)
 
+    # 信頼度順に並び変える
     sorted_idx = np.argsort(-responses)
     kpts_to_keep_idx = []
     removed_idx = set()
-
+    
+    # 信頼度順に近傍の点を探して削除
     for idx in sorted_idx:
-        # skip point if it was already removed
+        
+        # 削除リストに入っているものはスキップ
         if idx in removed_idx:
             continue
 
+        # キープリスト追加
         kpts_to_keep_idx.append(idx)
         point = kpts[idx]
+        
+        # pointの距離radiusの近傍の点を探索
         neighbors = kd_tree.query_ball_point(point, r=radius)
+        
+        # 近い距離のキーポイントを削除リストに追加
         # Variable `neighbors` contains the `point` itself
         removed_idx.update(neighbors)
 
