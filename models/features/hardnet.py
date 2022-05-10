@@ -17,9 +17,17 @@ class GFTTAffNetHardNet(Features):
     r"""Module for computing GFTTAffNetHardNet descriptors
     """
 
-    def __init__(self, descriptor_dim=128, max_keypoints=8000, perform_nms=True, nms_diameter=9, patch_size=32,
-                 upright=False, device: torch.device = torch.device('cpu')):
+    def __init__(self, 
+                 descriptor_dim=128, 
+                 max_keypoints=8000, 
+                 perform_nms=True, 
+                 nms_diameter=9, 
+                 patch_size=32,
+                 upright=False, 
+                 device: torch.device = torch.device('cpu')
+                ):
         super(Features, self).__init__()
+        
         self.perform_nms = perform_nms
         self.nms_diameter = nms_diameter
         self.max_keypoints = max_keypoints
@@ -35,4 +43,5 @@ class GFTTAffNetHardNet(Features):
 
         self.descriptor = LAFDescriptor(None,
                                         patch_size=patch_size,
-                                        grayscale_descriptor=True).to(device)
+                                        grayscale_descriptor=True
+                                       ).to(device)
