@@ -62,6 +62,8 @@ class FavorAttention(nn.Module):
         num_blocks = math.ceil(num_rows / num_cols)
         unstructured_block = torch.randn(num_blocks, num_cols, num_cols, device=device)
         norm = unstructured_block.norm(dim=-1).view(-1, 1)
+        
+        # torch.linalg.qr():m × n 実行列 Aを、 m 次直交行列 Q と m × n 上三角行列 R との積への分解により表す. 線型最小二乗問題を解くために使用される.
         q, r = torch.linalg.qr(unstructured_block, mode='reduced')
 
         # select num_rows vectors
@@ -84,9 +86,18 @@ class FavorAttention(nn.Module):
 
 
 class GeneralizedFavorAttention(FavorAttention):
-    def __init__(self, embed_dim, kernel_func, num_orthogonal_features=None, eps=1e-4):
-        super(GeneralizedFavorAttention, self).__init__(embed_dim, num_orthogonal_features,
-                                                        eps)
+    def __init__(self, 
+                 embed_dim, 
+                 kernel_func, 
+                 num_orthogonal_features=None, 
+                 eps=1e-4
+                 :
+        super(GeneralizedFavorAttention, self).__init__(
+                                                        embed_dim, 
+                                                        num_orthogonal_features,
+                                                        eps
+                                                       )
+                 
         self.kernel_func = kernel_func
 
     def randomized_kernel(self, x, is_query=True):
@@ -130,8 +141,10 @@ if __name__ == '__main__':
     key = torch.randn(10, 4, 64, 1025).to(device)
     value = torch.randn(10, 4, 64, 1025).to(device)
 
-    favor_attention = GeneralizedFavorAttention(embed_dim=64, kernel_func=nn.ReLU(inplace=True),
-                                                num_orthogonal_features=128).to(device)
+    favor_attention = GeneralizedFavorAttention(embed_dim=64, 
+                                                kernel_func=nn.ReLU(inplace=True),
+                                                num_orthogonal_features=128
+                                               ).to(device)
 
     y1, _ = softmax_attention(query, key, value)
     y2, _ = linear_attention_elu(query, key, value)
