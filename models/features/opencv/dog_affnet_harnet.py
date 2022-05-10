@@ -21,6 +21,10 @@ class DoGOpenCVAffNetHardNet(nn.Module):
     Class for detecting features using OpenCV implementation of SIFT,
     affine-shape estimation with torch-based implementation of AffNet,
     and description with torch-based implementation of HardNet
+    
+    detecting_features:SIFT : SIFT
+    affine-shape estimation : AffNet
+    description             : HardNet
     """
 
     def __init__(self, max_keypoints: int = -1, nms_diameter: float = 9.):
@@ -28,16 +32,25 @@ class DoGOpenCVAffNetHardNet(nn.Module):
         self.max_keypoints = max_keypoints
         self.nms_radius = nms_diameter / 2
 
+        # SIFT
         self.features = cv2.SIFT_create(contrastThreshold=-10000, edgeThreshold=-10000)
+        
+        # kornia.feature.hardnet
+        # DenseNetをベースにしており、DRAMへのアクセスがなるべく少なく、かつ精度を保つように設計されたネットワーク
         self.hardnet = KF.HardNet(True).eval()
+        
         # Affine shape estimator
-        self.affnet = KF.LAFAffNetShapeEstimator(True).eval()
+        # アフィン領域推定
+        self.affnet = KF.LAFAffNetShapeEstimator(True).eval() # local affine frames (LAFs)
+        
+        # オリエンテーションの計算
         self.orinet = KF.LAFOrienter(32, angle_detector=KF.OriNet(True)).eval()
 
     @torch.no_grad()
     def detect_and_compute(self,
                            image: Union[np.ndarray, torch.Tensor],
                            mask=None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        
         """
         Detect keypoint with DoG detector and apply HardNet description
         with AffNet for local affine shape estimation.
@@ -52,24 +65,34 @@ class DoGOpenCVAffNetHardNet(nn.Module):
         if isinstance(image, torch.Tensor):
             # support only batch size = 1
             assert image.size(0) == 1
+            
             device = image.device
             image_tensor = image
             image = (K.tensor_to_image(image_tensor) * 255).astype(np.uint8)
+            
         elif isinstance(image, np.ndarray):
             image_tensor = K.image_to_tensor(image, keepdim=False).float() / 255.  # (1,1,H,W)
             device = torch.device('cpu')
+            
         else:
             raise TypeError(f'Invalid type of `image` parameter: {type(image)}')
 
+        # self.features:SIFT
+        # SIFTでimageからキーポイントとスコアを取得
         kpts, scores = detect_kpts_opencv(self.features, image, self.nms_radius, self.max_keypoints)
+        
         scores = torch.from_numpy(scores).unsqueeze(0).to(device)
 
+        
         # convert OpenCV kpts to lafs in tensor format
-        lafs = laf_from_opencv_SIFT_kpts(kpts, device=device)  # (1,N,2,3)
+        lafs = laf_from_opencv_SIFT_kpts(kpts, device=device)  # (1,N,2,3)  # local affine frames (LAFs)
 
+        # lafsのアフィン領域推定＋オリエンテーションの計算
         lafs = self.orinet(self.affnet(lafs, image_tensor), image_tensor)
 
+        # 検出したスケールからパッチをサンプリングしてきて128次元のベクトルに記述
         patches = KF.extract_patches_from_pyramid(image_tensor, lafs, PS=32)
+        
         B, N, CH, H, W = patches.size()
         # Descriptor accepts standard tensor [B, CH, H, W], while patches are [B, N, CH, H, W] shape
         # So we need to reshape a bit
@@ -78,4 +101,9 @@ class DoGOpenCVAffNetHardNet(nn.Module):
         return lafs, scores, descriptors
 
     def forward(self, image: torch.Tensor, mask=None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        
+        # image > SIFT > キーポイントとスコア > lafs > アフィン領域推定 > オリエンテーションの計算 > lafs > patches > hardnet > descriptors        
         return self.detect_and_compute(image, mask)
+    
+    
+    
