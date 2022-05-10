@@ -25,6 +25,7 @@ def sample_desc_from_points(pts, coarse_desc, cell=8):
     pts = pts.view(1, 1, -1, 2)
     pts = pts * 2 - 1
 
+    # coarse_descからptsで指定した位置からサンプリング
     desc = torch.nn.functional.grid_sample(coarse_desc, pts, align_corners=False).view(1, D, -1)
     desc = torch.nn.functional.normalize(desc, p=2, dim=1)
 
