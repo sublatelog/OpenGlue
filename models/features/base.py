@@ -7,8 +7,16 @@ from kornia.geometry.subpix import nms2d
 
 class Features(nn.Module):
 
-    def __init__(self, detector, descriptor, perform_nms: bool = True, nms_diameter: int = 9, max_keypoints: int = 1024):
+    def __init__(self, 
+                 detector, 
+                 descriptor, 
+                 perform_nms: bool = True, 
+                 nms_diameter: int = 9, 
+                 max_keypoints: int = 1024
+                ):
+        
         super(Features, self).__init__()
+        
         self.detector = detector
         self.descriptor = descriptor
         self.perform_nms = perform_nms
@@ -18,6 +26,7 @@ class Features(nn.Module):
     @torch.no_grad()
     def run_nms(self, lafs, scores, img_size):
         """Perform non-maxima suppression over detected keypoints"""
+        
         device = lafs.device
         b, _, h, w = img_size
 
@@ -36,12 +45,16 @@ class Features(nn.Module):
             kpts_sorted_idx = torch.argsort(kpt_value_xyr)
 
             kpt_value_xy = kpt_value_xy[kpts_sorted_idx]
+            
             # get indices of unique kpts locations with highest response
+            # torch.unique_consecutive():連続していない重複値も排除
             _, unique_idx = torch.unique_consecutive(kpt_value_xy, return_inverse=True)
+            
             unique_idx = torch.cat(
-                [torch.tensor([0], dtype=torch.long, device=device),
-                 torch.where(unique_idx[1:] - unique_idx[:-1])[0] + 1]
+                                   [torch.tensor([0], dtype=torch.long, device=device),
+                                   torch.where(unique_idx[1:] - unique_idx[:-1])[0] + 1]
             )
+            
             unique_idx = kpts_sorted_idx[unique_idx]
 
             kpts_ = kpts_[unique_idx]
@@ -63,8 +76,8 @@ class Features(nn.Module):
         kpts_num = min(kpts_num, self.max_keypoints)
 
         # get scores and indices of keypoints to keep in each batch element
-        indices_to_keep = [torch.topk(scores_, kpts_num, dim=0).indices
-                           for scores_ in scores_list]
+        indices_to_keep = [torch.topk(scores_, kpts_num, dim=0).indices for scores_ in scores_list]
+        
         for i, idx in enumerate(indices_to_keep):
             lafs_list[i] = lafs_list[i][idx]
             scores_list[i] = scores_list[i][idx]
